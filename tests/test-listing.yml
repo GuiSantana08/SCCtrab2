@@ -1,0 +1,155 @@
+config:
+  target: 'https://scc-backend-60353.azurewebsites.net/rest/house'
+  http:
+    timeout: 60
+  plugins:
+    metrics-by-endpoint: {}
+    #metricsProcessEndpoint : "myProcessEndpoint"  # function used to aggregate endpoints for statistics
+  processor: "./test-utils.js"
+  variables:
+    numAuctions: 20
+  phases:
+  - name: "Warm up"    # WARM UP PHASE: duration: 10s, starting with 1 new client/sec up to 5 new clients/sec
+    duration: 1
+    arrivalRate: 1
+
+
+scenarios:
+  ################################### 1. Testing House's listing functions
+  - name: "Test Listing 0-Rentals"
+      weight: 1
+      flow:
+        - post:
+              url: "/create"
+              headers:
+                  Cookie: "scc:session={{sessionCookie}}"
+                  isCacheActive: false
+                  isAuthActive: false
+              json:
+                id: "7"
+                name: "Anibal"
+                location: "Elvas"
+                description: " Alguma coisa"
+                photoId: "dsadsa"
+                userId: "1"
+                basePrice: 100
+                availability: "october-november"
+        - post:
+            url: "/create"
+            headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+            json:
+              id: "8"
+              name: "Anibal"
+              location: "Elvas"
+              description: " Alguma coisa"
+              photoId: "dsadsa"
+              userId: "1"
+              basePrice: 100
+              availability: "november-december"
+        - post:
+            url: "/create"
+            headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+            json:
+              id: "9"
+              name: "Anibal"
+              location: "Elvas"
+              description: " Alguma coisa"
+              photoId: "dsadsa"
+              userId: "1"
+              basePrice: 100
+              availability: "december"
+        - get: 
+            url: "/getHouseByLocation?location=Elvas"
+            headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+            afterResponse: "printStatus"
+        - get:
+            url: "/searchAvailableHouses?period=november&location=Elvas"
+            headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+            afterResponse: "printStatus"
+        - get:
+            url: "/searchAvailableHouses?period=december&location=Elvas"
+            headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+            afterResponse: "printStatus"
+        - get:
+            url: "/searchAvailableHouses?period=october&location=Elvas"
+            headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+            afterResponse: "printStatus"
+        - delete: 
+              url: "/delete?id=7"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+        - delete: 
+              url: "/delete?id=8"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+        - delete: 
+              url: "/delete?id=9"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+  ################################### 2. Testing Rental's listing functions
+  - name: "Test Listing 0-Rentals"
+      weight: 1
+      flow:
+        - loop:
+            - post:
+                url: "/1/rental/create"
+                headers:
+                  Cookie: "scc:session={{sessionCookie}}"
+                  isCacheActive: false
+                  isAuthActive: false   
+                json: 
+                  id: "1"
+                  userId: "1" 
+                  rentalPeriod: "december"
+                  price: 1
+            - get:
+                url: "/1/rental/listDiscontedRentals"
+                headers:
+                  Cookie: "scc:session={{sessionCookie}}"
+                  isCacheActive: false
+                  isAuthActive: false
+            - delete:
+                url: "/1/rental/delete?id=1"
+                headers:
+                  Cookie: "scc:session={{sessionCookie}}"
+                  isCacheActive: false
+                  isAuthActive: false 
+          count: "{{numRentals}}"
+  ################################### 3. Testing Cognitive Search
+  - name: "Test Listing 0-Rentals"
+      weight: 1
+      flow:
+        - loop:
+            - get:
+                url: "/trysearch?query=Anibal&filterType=location&filter=Elvas"           
+            - get:
+                url: "/trysearch?query=Elvas&filterType=userid&filter=1"
+            - get:
+                url: "/trysearch?query=1&filterType=name&filter=Anibal"               
+          count: "{{numRentals}}"
+
+  

@@ -1,0 +1,8 @@
+normal run:
+    artillery run test-users.yml
+
+json output:
+    artillery run --output test-users.json test-users.yml
+
+generate html:
+    artillery report --output test-users.html test-users.json

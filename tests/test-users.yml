@@ -1,0 +1,170 @@
+config:
+  target: 'https://scc-backend-60353.azurewebsites.net/rest'
+  http:
+    timeout: 60
+  plugins:
+    metrics-by-endpoint: {}
+    #metricsProcessEndpoint : "myProcessEndpoint"  # function used to aggregate endpoints for statistics
+  processor: "./test-utils.js"
+  variables:
+    numAuctions: 20
+  phases:
+  - name: "Warm up"    # WARM UP PHASE: duration: 10s, starting with 1 new client/sec up to 5 new clients/sec
+    duration: 1
+    arrivalRate: 1
+
+
+scenarios:
+  ################################### 1. Testing User without Cache and without Authentication
+  - name: "User Cycle 0-Cache 0-auth"
+    weight: 1
+    flow:
+      - loop:
+          - post:
+              url: "/user/create"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+              json:
+                id: "1"
+                name: "Test User"
+                pwd: "password"
+                photoId: "photo123"
+          - put:
+              url: "/user/update"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+              json:
+                id: "1"
+                name: "Updated User"
+                pwd: "newpassword"
+                photoId: "newphoto123"
+          - post:
+              url: "/house/create"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+              json:
+                id: "6"
+                name: "Anibal"
+                location: "Elvas"
+                description: " Alguma coisa"
+                photoId: "dsadsa"
+                userId: "1"
+                basePrice: 100
+                availability: "october-november-december"
+          - get:
+              url: "/user/listHouses?userId=1"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+              afterResponse: "printStatus" 
+          - delete:
+              url: "/user/delete?userId=1"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+          - delete: 
+              url: "/house/delete?id=6"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+        count: "{{ numAuctions }}"
+  ################################### 2. Testing User with Cache but without Authentication
+  - name: "User Cycle 1-Cache 0-Auth"
+    weight: 0
+    flow:
+      - loop:
+          - post:
+              url: "/create"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: true
+                isAuthActive: false
+              json:
+                id: "1"
+                name: "Test User"
+                pwd: "password"
+                photoId: "photo123"
+          - put:
+              url: "/update"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: true
+                isAuthActive: false
+              json:
+                id: "1"
+                name: "Updated User"
+                pwd: "newpassword"
+                photoId: "newphoto123"
+          - get:
+              url: "/listHouses?userId=1"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: true
+                isAuthActive: false
+          - delete:
+              url: "/delete?userId=1"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: true
+                isAuthActive: false
+        count: "{{ numAuctions }}"
+  ################################### 3. Testing User with Cache and Authentication       
+  - name: "User Cycle 1-Cache 1-Auth"
+    weight: 0
+    flow:
+      - loop:
+          - name: "Authenticate a user"
+            flow:
+              - post:
+                  url: "/auth"
+                  json:
+                    name: "Auth User"
+                    pwd: "password"
+                  capture:
+                   - json: "$.session"
+                     as: "sessionCookie"
+          - post:
+              url: "/create"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: true
+                isAuthActive: true
+              json:
+                id: "1"
+                name: "Test User"
+                pwd: "password"
+                photoId: "photo123"
+          - put:
+              url: "/update"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: true
+                isAuthActive: true
+              json:
+                id: "1"
+                name: "Updated User"
+                pwd: "newpassword"
+                photoId: "newphoto123"
+          - get:
+              url: "/listHouses?userId=1"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: true
+                isAuthActive: true
+          - delete:
+              url: "/delete?userId=1"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: true
+                isAuthActive: true
+        count: "{{ numAuctions }}"    
+          

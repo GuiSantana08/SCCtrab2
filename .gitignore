@@ -1,3 +1,6 @@
+#IDE's
+*.idea
+
 # Compiled class file
 *.class
 
@@ -21,4 +24,7 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-replay_pid*
+/target/scc2324-lab1-1.0/index.html
+/target/scc2324-lab1-1.0/META-INF/MANIFEST.MF
+/target/scc2324-lab1-1.0/WEB-INF/web.xml
+/target/maven-archiver/pom.properties

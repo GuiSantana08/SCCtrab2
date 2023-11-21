@@ -1,0 +1,169 @@
+config:
+  target: 'https://scc-backend-60353.azurewebsites.net/rest/house'
+  http:
+    timeout: 60
+  plugins:
+    metrics-by-endpoint: {}
+    #metricsProcessEndpoint : "myProcessEndpoint"  # function used to aggregate endpoints for statistics
+  processor: "./test-utils.js"
+  variables:
+    numAuctions: 20
+  phases:
+  - name: "Warm up"    # WARM UP PHASE: duration: 10s, starting with 1 new client/sec up to 5 new clients/sec
+    duration: 1
+    arrivalRate: 1
+
+
+scenarios:
+  ################################### 1. Testing Houses without Cache and without Authentication
+  - name: "House Cycle 0-Cache 0-Auth"
+    weight: 0
+    flow:
+      - loop:
+        - post:
+            url: "/create"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: false
+              isAuthActive: false
+            json:
+              id: "6"
+              name: "Anibal"
+              location: "Elvas"
+              description: " Alguma coisa"
+              photoId: "dsadsa"
+              userId: "1"
+              basePrice: 100
+              availability: "october-november-december"
+        - put: 
+            url: "/update"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: false
+              isAuthActive: false
+            json:
+              id: "6"
+              name: "Anibal"
+              location: "Elvas"
+              description: " Alguma coisa"
+              photoId: "dsadsa"
+              userId: "1"
+              basePrice: 100
+              availability: "october-november-december"
+        - get:
+            url: "/get?id=6"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: false
+              isAuthActive: false
+            afterResponse: "printStatus"
+        - delete: 
+            url: "/delete?id=6"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: false
+              isAuthActive: false
+        count: "{{ numAuctions }}"
+  ################################### 2. Testing User with Cache but without Authentication
+  - name: "House Cycle 1-Cache 0-Auth"
+    weight: 0
+    flow:
+      - loop:
+        - post:
+            url: "/create"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: true
+              isAuthActive: false
+            json:
+              id: "6"
+              name: "Anibal"
+              location: "Elvas"
+              description: " Alguma coisa"
+              photoId: "dsadsa"
+              userId: "1"
+              basePrice: 100
+              availability: "october-november-december"
+        - put: 
+            url: "/update"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: true
+              isAuthActive: false
+            json:
+              id: "6"
+              name: "Anibal"
+              location: "Elvas"
+              description: " Alguma coisa"
+              photoId: "dsadsa"
+              userId: "1"
+              basePrice: 100
+              availability: "october-november-december"
+        - get:
+            url: "/get?id=6"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: true
+              isAuthActive: false
+            afterResponse: "printStatus"
+        - delete: 
+            url: "/delete?id=6"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: true
+              isAuthActive: false
+        count: "{{ numAuctions }}"
+  ################################### 3. Testing User with Cache and Authentication
+  - name: "House Cycle 1-Cache 1-Auth"
+    weight: 0
+    flow:
+      - loop:
+        - post:
+            url: "/create"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: true
+              isAuthActive: true
+            json:
+              id: "6"
+              name: "Anibal"
+              location: "Elvas"
+              description: " Alguma coisa"
+              photoId: "dsadsa"
+              userId: "1"
+              basePrice: 100
+              availability: "october-november-december"
+        - put: 
+            url: "/update"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: true
+              isAuthActive: true
+            json:
+              id: "6"
+              name: "Anibal"
+              location: "Elvas"
+              description: " Alguma coisa"
+              photoId: "dsadsa"
+              userId: "1"
+              basePrice: 100
+              availability: "october-november-december"
+        - get:
+            url: "/get?id=6"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: true
+              isAuthActive: true
+            afterResponse: "printStatus"
+        - delete: 
+            url: "/delete?id=6"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: true
+              isAuthActive: true
+        count: "{{ numAuctions }}"
+      
+
+       
+      
+
