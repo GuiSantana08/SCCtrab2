@@ -55,11 +55,11 @@ public class QuestionDAO {
         this.houseId = house;
     }
 
-    public String getPostUser() {
+    public String getPostUserId() {
         return this.postUserId;
     }
 
-    public void setPostUser(String postUserId) {
+    public void setPostUserId(String postUserId) {
         this.postUserId = postUserId;
     }
 

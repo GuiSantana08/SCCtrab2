@@ -1,5 +1,5 @@
 config:
-  target: 'https://scc-backend-60353.azurewebsites.net/rest/house'
+  target: 'https://scc-backend-60353.azurewebsites.net/rest'
   http:
     timeout: 60
   plugins:
@@ -7,7 +7,7 @@ config:
     #metricsProcessEndpoint : "myProcessEndpoint"  # function used to aggregate endpoints for statistics
   processor: "./test-utils.js"
   variables:
-    numAuctions: 20
+    numActions: 20
     rentalId: 1
   phases:
   - name: "Warm up"    # WARM UP PHASE: duration: 10s, starting with 1 new client/sec up to 5 new clients/sec
@@ -16,13 +16,13 @@ config:
 
 
 scenarios:
+  - name: "Rental Testing"
+    weight: 1
+    flow: 
   ################################### 1. Testing Rentals without Cache and without Authentication
-  - name: "Question Cycle 0-Cache 0-Auth"
-    weight: 1
-    flow: 
       - loop:
         - post:
-            url: "/1/rental/create"
+            url: "/house/1/rental/create"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: false
@@ -33,7 +33,7 @@ scenarios:
               rentalPeriod: "october"
               price: 100
         - put:
-            url: "/1/rental/update"
+            url: "/house/1/rental/update"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: false
@@ -44,26 +44,23 @@ scenarios:
               rentalPeriod: "october"
               price: 100
         - get:
-            url: "/1/rental/getInfo?id=1"
+            url: "/house/1/rental/getInfo?id=1"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: false
               isAuthActive: false
             afterResponse: "printStatus" 
         - delete:
-            url: "/1/rental/delete?id=1"
+            url: "/house/1/rental/delete?id=1"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: false
               isAuthActive: false 
-        count: "{{ numAuctions }}"
+        count: "{{ numActions }}"
   ################################### 2. Testing Rentals with Cache but without Authentication
-  - name: "Question Cycle 0-Cache 0-Auth"
-    weight: 1
-    flow: 
       - loop:
         - post:
-            url: "/1/rental/create"
+            url: "/house/1/rental/create"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
@@ -74,7 +71,7 @@ scenarios:
               rentalPeriod: "october"
               price: 100
         - put:
-            url: "/1/rental/update"
+            url: "/house/1/rental/update"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
@@ -85,26 +82,28 @@ scenarios:
               rentalPeriod: "october"
               price: 100
         - get:
-            url: "/1/rental/getInfo?id=1"
+            url: "/house/1/rental/getInfo?id=1"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
               isAuthActive: false
             afterResponse: "printStatus" 
         - delete:
-            url: "/1/rental/delete?id=1"
+            url: "/house/1/rental/delete?id=1"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
               isAuthActive: false 
-        count: "{{ numAuctions }}"
+        count: "{{ numActions }}"
   ################################### 3. Testing User with Cache and Authentication
-  - name: "Question Cycle 0-Cache 0-Auth"
-    weight: 1
-    flow: 
       - loop:
         - post:
-            url: "/1/rental/create"
+            url: "/user/auth"
+            json: 
+              username: "1"
+              password: "password"
+        - post:
+            url: "/house/1/rental/create"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
@@ -115,7 +114,7 @@ scenarios:
               rentalPeriod: "october"
               price: 100
         - put:
-            url: "/1/rental/update"
+            url: "/house/1/rental/update"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
@@ -126,17 +125,17 @@ scenarios:
               rentalPeriod: "october"
               price: 100
         - get:
-            url: "/1/rental/getInfo?id=1"
+            url: "/house/1/rental/getInfo?id=1"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
               isAuthActive: true
             afterResponse: "printStatus" 
         - delete:
-            url: "/1/rental/delete?id=1"
+            url: "/house/1/rental/delete?id=1"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
               isAuthActive: true 
-        count: "{{ numAuctions }}"
+        count: "{{ numActions }}"
 

@@ -64,13 +64,15 @@ public class HouseResource implements HouseResourceInterface {
     public Response deleteHouse(boolean isCacheActive, boolean isAuthActive, Cookie session, String id) {
         try {
             if (isAuthActive) {
-                // UserResource.checkCookieUser(session, house.getUserId()); TODO
+                var houseIt = houseDb.getHouseById(id).iterator();
+                if (houseIt.hasNext())
+                    UserResource.checkCookieUser(session, houseIt.next().getUserId());
             }
 
             houseDb.delHouseById(id);
 
             if (isCacheActive) {
-                cache.delete(id, HouseDAO.class);
+                cache.delete(id);
             }
 
             return Response.ok().build();
@@ -95,7 +97,7 @@ public class HouseResource implements HouseResourceInterface {
                 var newH = houseDb.getHouseById(id);
 
                 if (isCacheActive) {
-                    cache.setValue(id, newH);
+                    cache.setValue(id, newH.iterator().next());
                 }
 
                 return Response.ok(newH.iterator().next()).build();
@@ -141,7 +143,7 @@ public class HouseResource implements HouseResourceInterface {
             String currentMonth = LocalDate.now().getMonth().toString().toLowerCase();
 
             for (HouseDAO h : houseCosmos) {
-                CosmosPagedIterable<RentalDAO> rentals = rentDb.getHouseById(h.getId());
+                CosmosPagedIterable<RentalDAO> rentals = rentDb.getRentalsByHouseId(h.getId());
                 boolean isOn = true;
                 for (RentalDAO r : rentals) {
                     if (r.getRentalPeriod().contains(currentMonth))
@@ -167,7 +169,7 @@ public class HouseResource implements HouseResourceInterface {
             String[] months = period.split("-");
 
             for (HouseDAO h : filterAvailableHouses(houseCosmos, months)) {
-                CosmosPagedIterable<RentalDAO> rentals = rentDb.getHouseById(h.getId());
+                CosmosPagedIterable<RentalDAO> rentals = rentDb.getRentalsByHouseId(h.getId());
                 boolean isOn = true;
                 for (RentalDAO r : rentals) {
                     for (String month : months) {
@@ -207,7 +209,7 @@ public class HouseResource implements HouseResourceInterface {
                 break;
         }
 
-        Map<String, Object> result = search.csQuery(query, CSFilter);
+        List<List<Map.Entry<String, Object>>> result = search.csQuery(query, CSFilter);
 
         return Response.ok(result).build();
     }

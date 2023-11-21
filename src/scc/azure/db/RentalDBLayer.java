@@ -84,7 +84,7 @@ public class RentalDBLayer {
                 RentalDAO.class);
     }
 
-    public CosmosPagedIterable<RentalDAO> getHouseById(String id) {
+    public CosmosPagedIterable<RentalDAO> getRentalsByHouseId(String id) {
         init();
         return rentals.queryItems("SELECT * FROM rentals WHERE rentals.houseId=\"" + id + "\"",
                 new CosmosQueryRequestOptions(),

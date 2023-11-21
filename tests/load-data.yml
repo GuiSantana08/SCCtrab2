@@ -1,0 +1,36 @@
+config:
+  target: 'https://scc-backend-60353.azurewebsites.net/rest/media'
+  plugins:
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+  processor: "./test-utils.js"
+  variables:
+    numImages: 50
+
+  phases:
+  - name: "Create users"    # Create users
+    duration: 1
+    arrivalCount: 1
+
+scenarios:
+  - name: 'Test Images'
+    weight: 1
+    flow:
+      - loop:                            # let's create 950 users - loop ... count
+        - post:                          # First: post image for the user
+            url: "/upload"
+            beforeRequest: "uploadImageBody"
+            headers:
+              Content-Type: application/octet-stream
+              Accept: application/json
+            capture:
+              regexp: "(.+)"
+              as: "imageId" 
+        - get: 
+            url: "/download/{{imageId}}"
+        - get:
+            url: "/list"
+        - delete: 
+            url: "/delete/{{imageId}}"
+        count: "{{numImages}}"
+

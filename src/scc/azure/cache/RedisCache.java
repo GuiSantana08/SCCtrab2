@@ -45,9 +45,8 @@ public class RedisCache {
     public <T> void setValue(String id, T item) {
         ObjectMapper mapper = new ObjectMapper();
         try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-            String cacheId = item.getClass().getSimpleName() + ":" + id;
-            jedis.set(cacheId, mapper.writeValueAsString(item));
-            jedis.expire(cacheId, TTL);
+            jedis.set(id, mapper.writeValueAsString(item));
+            jedis.expire(id, TTL);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -55,7 +54,7 @@ public class RedisCache {
 
     public <T> T getValue(String id, Class<T> type) {
         try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-            String str = jedis.get(type.getSimpleName() + ":" + id);
+            String str = jedis.get(id);
             ObjectMapper mapper = new ObjectMapper();
             T item = null;
             try {
@@ -67,15 +66,15 @@ public class RedisCache {
         }
     }
 
-    public <T> void delete(String id, Class<T> type) {
+    public <T> void delete(String id) {
         try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-            jedis.del(type.getSimpleName() + ":" + id);
+            jedis.del(id);
         }
     }
 
     public void putSession(Session session) {
         try (Jedis jedis = RedisCache.getCachePool().getResource()) {
-            String cacheId = "session:" + session.getUid();
+            String cacheId = session.getUid();
             jedis.set(cacheId, session.getUsername());
             jedis.expire(cacheId, TTL);
         } catch (Exception e) {

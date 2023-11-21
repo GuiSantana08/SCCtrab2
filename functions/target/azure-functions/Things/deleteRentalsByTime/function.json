@@ -1,0 +1,10 @@
+{
+  "scriptFile" : "../scc2223-lab5-1.0.jar",
+  "entryPoint" : "scc.serverless.TimerFunction.cosmosFunction",
+  "bindings" : [ {
+    "type" : "timerTrigger",
+    "direction" : "in",
+    "name" : "periodicSetTime",
+    "schedule" : "* */1 * * * *"
+  } ]
+}

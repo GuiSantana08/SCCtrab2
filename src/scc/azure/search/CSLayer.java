@@ -1,6 +1,7 @@
 package scc.azure.search;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.azure.core.credential.AzureKeyCredential;
@@ -42,25 +43,27 @@ public class CSLayer {
         this.searchClient = searchClient;
     }
 
-    public Map<String, Object> csQuery(String query, String filter) {
+    public List<List<Map.Entry<String, Object>>> csQuery(String query, String filter) {
         SearchOptions options = new SearchOptions()
                 .setIncludeTotalCount(true)
                 .setFilter(filter)
-                .setSelect("rid", "userId", "name", "location", "description")
-                .setSearchFields("name", "description")
+                .setSelect("id", "userId", "name", "location", "description", "basePrice", "availability")
+                .setSearchFields("name", "description", "location")
                 .setTop(5);
 
         SearchPagedIterable searchPagedIterable = searchClient.search(query, options, null);
 
-        Map<String, Object> map = new HashMap<>();
+        List<List<Map.Entry<String, Object>>> results = new ArrayList<>();
         for (SearchPagedResponse resultResponse : searchPagedIterable.iterableByPage()) {
+            List<Map.Entry<String, Object>> houses = new ArrayList<>();
             resultResponse.getValue().forEach(searchResult -> {
                 for (Map.Entry<String, Object> res : searchResult.getDocument(SearchDocument.class).entrySet()) {
-                    map.put(res.getKey(), res.getValue());
+                    houses.add(res);
                 }
             });
+            results.add(houses);
         }
 
-        return map;
+        return results;
     }
 }

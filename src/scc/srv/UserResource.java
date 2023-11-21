@@ -24,6 +24,7 @@ import scc.data.User;
 import scc.data.UserDAO;
 import scc.interfaces.UserResourceInterface;
 import scc.utils.Constants;
+import scc.utils.Hash;
 import scc.utils.Login;
 import scc.utils.Session;
 
@@ -36,17 +37,18 @@ public class UserResource implements UserResourceInterface {
     static RedisCache cache = RedisCache.getInstance();
 
     @Override
-    public Response createUser(boolean isCacheActive, boolean isAuthActive, Cookie session, User us) {
+    public Response createUser(boolean isCacheActive, boolean isAuthActive, Cookie session, User user) {
         try {
             if (isAuthActive) {
-                checkCookieUser(session, us.getId());
+                checkCookieUser(session, user.getId());
             }
 
-            UserDAO user = new UserDAO(us);
-            CosmosItemResponse<UserDAO> u = userDb.putUser(user);
+            UserDAO userDAO = new UserDAO(user);
+            userDAO.setPwd(Hash.of(user.getPwd()));
+            CosmosItemResponse<UserDAO> u = userDb.putUser(userDAO);
 
             if (isCacheActive) {
-                cache.setValue(user.getId(), user);
+                cache.setValue(userDAO.getId(), userDAO);
             }
 
             return Response.ok(u.getItem().toString()).build();
@@ -82,7 +84,7 @@ public class UserResource implements UserResourceInterface {
             }
 
             if (isCacheActive) {
-                cache.delete(userId, UserDAO.class);
+                cache.delete(userId);
             }
 
             userDb.delUserById(userId);
@@ -104,6 +106,7 @@ public class UserResource implements UserResourceInterface {
             }
 
             UserDAO uDAO = new UserDAO(user);
+            uDAO.setPwd(Hash.of(user.getPwd()));
             CosmosItemResponse<UserDAO> u = userDb.updateUser(uDAO);
 
             if (isCacheActive) {
@@ -112,7 +115,7 @@ public class UserResource implements UserResourceInterface {
 
             return Response.ok(u.getItem().toString()).build();
         } catch (NotAuthorizedException c) {
-            return Response.status(Status.NOT_ACCEPTABLE).entity(c.getLocalizedMessage()).build();
+            return Response.status(Status.NOT_ACCEPTABLE).entity(c.getMessage()).build();
         } catch (CosmosException c) {
             return Response.status(c.getStatusCode()).entity(c.getLocalizedMessage()).build();
         } catch (Exception e) {
@@ -124,7 +127,6 @@ public class UserResource implements UserResourceInterface {
     public Response listHouses(String id) {
         List<HouseDAO> userHouses = new ArrayList<>();
 
-        // TODO maybe should verify if user exists
         try {
             CosmosPagedIterable<HouseDAO> houses = houseDb.getHouseByUserId(id);
 
@@ -141,11 +143,21 @@ public class UserResource implements UserResourceInterface {
 
     }
 
-    // TODO
     public Response auth(Login user) {
         boolean pwdOk = true;
 
-        // Check pwd
+        String id = user.getId();
+        String password = user.getPassword();
+
+        if (id == null || password == null) {
+            pwdOk = false;
+        }
+
+        var userIt = userDb.getUserById(id).iterator();
+
+        if (!userIt.hasNext() || !Hash.of(password).equals(userIt.next().getPwd())) {
+            pwdOk = false;
+        }
 
         if (pwdOk) {
             String uid = UUID.randomUUID().toString();
@@ -158,7 +170,7 @@ public class UserResource implements UserResourceInterface {
                     .httpOnly(true)
                     .build();
 
-            cache.putSession(new Session(uid, user.getUsername()));
+            cache.putSession(new Session(uid, user.getId()));
             return Response.ok().cookie(cookie).build();
         } else
             throw new NotAuthorizedException("Incorrect login");
@@ -179,8 +191,9 @@ public class UserResource implements UserResourceInterface {
         }
         if (s == null || s.getUsername() == null || s.getUsername().length() == 0)
             throw new NotAuthorizedException("No valid session initialized");
-        if (!s.getUsername().equals(id) && !s.getUsername().equals("admin"))
+        if (!s.getUsername().equals(id))
             throw new NotAuthorizedException("Invalid user : " + s.getUsername());
         return s;
     }
+
 }

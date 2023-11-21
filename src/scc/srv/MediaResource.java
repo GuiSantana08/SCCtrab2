@@ -1,12 +1,12 @@
 package scc.srv;
 
-import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobContainerClientBuilder;
+import java.util.List;
+
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import scc.azure.blob.BlobStoreLayer;
 import scc.interfaces.MediaResourceInterface;
-import scc.utils.Hash;
 
 /**
  * Resource for managing media files, such as images.
@@ -14,22 +14,32 @@ import scc.utils.Hash;
 @Path("/media")
 public class MediaResource implements MediaResourceInterface {
 
-	String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=scc2223lab2;AccountKey=aKo5p8YMR6kaaXQdYpakkzC1KDS0rKibpazF4dyV0MpL2ezGcRjzOJEuzCVYZ2lPsgCMWi5L37c/+AStrnDibA==;EndpointSuffix=core.windows.net";
-	BlobContainerClient containerClient = new BlobContainerClientBuilder()
-			.connectionString(storageConnectionString)
-			.containerName("images")
-			.buildClient();
+	BlobStoreLayer blob = BlobStoreLayer.getInstance();
 
-	public String upload(byte[] contents) {
-		String key = Hash.of(contents);
-		BlobClient blob = containerClient.getBlobClient(key);
-		blob.upload(BinaryData.fromBytes(contents));
-		return key;
+	public Response upload(byte[] contents) {
+		Double key = Math.random();
+		blob.upload(key.toString(), contents);
+		return Response.ok().entity(key).build();
 	}
 
-	public byte[] download(String id) {
-		BlobClient blob = containerClient.getBlobClient(id);
-		BinaryData data = blob.downloadContent();
-		return data.toBytes();
+	public Response download(String id) {
+		byte[] data = blob.download(id);
+		return Response.ok().entity(data).build();
+	}
+
+	@Override
+	public Response delete(String id) {
+		boolean isDeleted = blob.delete(id);
+
+		if (!isDeleted)
+			return Response.status(Status.NOT_FOUND).build();
+
+		return Response.ok().build();
+	}
+
+	@Override
+	public Response listImages() {
+		List<String> list = blob.list();
+		return Response.ok().entity(list).build();
 	}
 }

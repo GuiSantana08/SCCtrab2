@@ -23,7 +23,7 @@ import scc.data.Rental;
 import scc.data.RentalDAO;
 import scc.interfaces.RentalResourceInterface;
 
-@Path("/house/{id}/rental") // TODO: instead of inserting house on json, use id to get it
+@Path("/house/{id}/rental")
 public class RentalResource implements RentalResourceInterface {
 
     ObjectMapper mapper = new ObjectMapper();
@@ -37,7 +37,7 @@ public class RentalResource implements RentalResourceInterface {
             String id) {
         try {
             if (isAuthActive) {
-                // UserResource.checkCookieUser(session, ); TODO
+                UserResource.checkCookieUser(session, rental.getUserId());
             }
 
             RentalDAO rDAO = new RentalDAO(rental, id);
@@ -66,7 +66,7 @@ public class RentalResource implements RentalResourceInterface {
             String id) {
         try {
             if (isAuthActive) {
-                // UserResource.checkCookieUser(session, ); TODO
+                UserResource.checkCookieUser(session, rental.getUserId());
             }
 
             RentalDAO rDAO = new RentalDAO(rental, id);
@@ -123,13 +123,15 @@ public class RentalResource implements RentalResourceInterface {
     public Response deleteRental(boolean isCacheActive, boolean isAuthActive, Cookie session, String id) {
         try {
             if (isAuthActive) {
-                // UserResource.checkCookieUser(session, house.getUserId()); TODO
+                var rentalIt = rentalDB.getRentalById(id).iterator();
+                if (rentalIt.hasNext())
+                    UserResource.checkCookieUser(session, rentalIt.next().getUserId());
             }
 
             rentalDB.delRentalById(id);
 
             if (isCacheActive) {
-                cache.delete(id, RentalDAO.class);
+                cache.delete(id);
             }
 
             return Response.ok().build();
@@ -150,7 +152,7 @@ public class RentalResource implements RentalResourceInterface {
             int currentMonth = LocalDate.now().getMonth().getValue();
 
             for (HouseDAO h : houseCosmos) {
-                CosmosPagedIterable<RentalDAO> rentals = rentalDB.getHouseById(h.getId());
+                CosmosPagedIterable<RentalDAO> rentals = rentalDB.getRentalsByHouseId(h.getId());
                 for (RentalDAO r : rentals) {
                     for (String month : r.getRentalPeriod().split("-")) {
                         if (r.getPrice() < h.getBasePrice()

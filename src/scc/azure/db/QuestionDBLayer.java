@@ -89,7 +89,7 @@ public class QuestionDBLayer {
         return questions.queryItems("SELECT * FROM questions ", new CosmosQueryRequestOptions(), QuestionDAO.class);
     }
 
-    public CosmosPagedIterable<QuestionDAO> getHouseQuestions(String houseId) {
+    public CosmosPagedIterable<QuestionDAO> getQuestionsByHouseId(String houseId) {
         init();
         return questions.queryItems("SELECT * FROM questions WHERE questions.houseId=\"" + houseId + "\"",
                 new CosmosQueryRequestOptions(),

@@ -9,7 +9,7 @@ public enum Constants {
             null),
     camposConst("https://scc2324db60353.documents.azure.com:443/",
             "Y2TBwQZcPSyzjtt3DerktHMEVWr0MZfrcriJ8w7gffqCcQMtAdoSyL3XHgCxU2HLmhGo6fxm3EMbACDbLpWZdg==", "scc2324",
-            "scc2324ache60353.redis.cache.windows.net", "ncBK7vPcdT1hQ5iCEiYOYLUwSdw50xkLRAzCaKP2fkU="),
+            "scc2324cache60353.redis.cache.windows.net", "KWLleeCMwMy1AL7WngYv0JSsVKfFLdJUlAzCaPWF0cM="),
     deletedUser(null, null, "DeletedUser", null, null);
 
     private final String dbUrl;

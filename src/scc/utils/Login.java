@@ -1,20 +1,24 @@
 package scc.utils;
 
 public class Login {
-    String username;
+    String id;
     String password;
 
+    public Login() {
+
+    }
+
     public Login(String username, String password) {
-        this.username = username;
+        this.id = username;
         this.password = password;
     }
 
-    public String getUsername() {
-        return this.username;
+    public String getId() {
+        return this.id;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setId(String username) {
+        this.id = username;
     }
 
     public String getPassword() {

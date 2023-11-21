@@ -57,13 +57,15 @@ public class QuestionResource implements QuestionResourceInterface {
     public Response deleteQuestion(boolean isCacheActive, boolean isAuthActive, Cookie session, String id) {
         try {
             if (isAuthActive) {
-                // UserResource.checkCookieUser(session, house.getUserId()); TODO
+                var questionIt = questionDb.getQuestionById(id).iterator();
+                if (questionIt.hasNext())
+                    UserResource.checkCookieUser(session, questionIt.next().getPostUserId());
             }
 
             questionDb.delQuestionById(id);
 
             if (isCacheActive) {
-                cache.delete(id, QuestionDAO.class);
+                cache.delete(id);
             }
 
             return Response.ok().build();
@@ -81,10 +83,10 @@ public class QuestionResource implements QuestionResourceInterface {
         List<QuestionDAO> questions = new ArrayList<>();
         try {
 
-            CosmosPagedIterable<QuestionDAO> u = questionDb.getHouseQuestions(id);
+            CosmosPagedIterable<QuestionDAO> u = questionDb.getQuestionsByHouseId(id);
 
-            while (u.iterator().hasNext()) {
-                questions.add(u.iterator().next());
+            for (QuestionDAO question : u) {
+                questions.add(question);
             }
 
             return Response.ok(questions).build();

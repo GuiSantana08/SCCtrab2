@@ -1,0 +1,14 @@
+{
+  "scriptFile" : "../scc2223-lab5-1.0.jar",
+  "entryPoint" : "scc.serverless.RecentHousesFunction.Func",
+  "bindings" : [ {
+    "type" : "cosmosDBTrigger",
+    "direction" : "in",
+    "name" : "database",
+    "leaseCollectionName" : "leases",
+    "databaseName" : "scc2324",
+    "connectionStringSetting" : "AzureCosmosDBConnection",
+    "createLeaseCollectionIfNotExists" : true,
+    "collectionName" : "houses"
+  } ]
+}

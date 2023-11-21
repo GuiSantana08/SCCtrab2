@@ -7,7 +7,7 @@ config:
     #metricsProcessEndpoint : "myProcessEndpoint"  # function used to aggregate endpoints for statistics
   processor: "./test-utils.js"
   variables:
-    numAuctions: 20
+    numActions: 20
   phases:
   - name: "Warm up"    # WARM UP PHASE: duration: 10s, starting with 1 new client/sec up to 5 new clients/sec
     duration: 1
@@ -15,10 +15,11 @@ config:
 
 
 scenarios:
-  ################################### 1. Testing House's listing functions
   - name: "Test Listing 0-Rentals"
-      weight: 1
-      flow:
+    weight: 1
+    flow:
+  ################################### 1. Testing House's listing functions
+      - loop:
         - post:
               url: "/create"
               headers:
@@ -110,46 +111,42 @@ scenarios:
                 Cookie: "scc:session={{sessionCookie}}"
                 isCacheActive: false
                 isAuthActive: false
+        count: "{{numActions}}"
   ################################### 2. Testing Rental's listing functions
-  - name: "Test Listing 0-Rentals"
-      weight: 1
-      flow:
-        - loop:
-            - post:
-                url: "/1/rental/create"
-                headers:
-                  Cookie: "scc:session={{sessionCookie}}"
-                  isCacheActive: false
-                  isAuthActive: false   
-                json: 
-                  id: "1"
-                  userId: "1" 
-                  rentalPeriod: "december"
-                  price: 1
-            - get:
-                url: "/1/rental/listDiscontedRentals"
-                headers:
-                  Cookie: "scc:session={{sessionCookie}}"
-                  isCacheActive: false
-                  isAuthActive: false
-            - delete:
-                url: "/1/rental/delete?id=1"
-                headers:
-                  Cookie: "scc:session={{sessionCookie}}"
-                  isCacheActive: false
-                  isAuthActive: false 
-          count: "{{numRentals}}"
+      - loop:
+          - post:
+              url: "/2/rental/create"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false   
+              json: 
+                id: "1"
+                userId: "1" 
+                rentalPeriod: "november-december"
+                price: 1
+          - get:
+              url: "/2/rental/listDiscontedRentals"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false
+              afterResponse: "printStatus"
+          - delete:
+              url: "/2/rental/delete?id=1"
+              headers:
+                Cookie: "scc:session={{sessionCookie}}"
+                isCacheActive: false
+                isAuthActive: false 
+        count: "{{numActions}}"
   ################################### 3. Testing Cognitive Search
-  - name: "Test Listing 0-Rentals"
-      weight: 1
-      flow:
-        - loop:
-            - get:
-                url: "/trysearch?query=Anibal&filterType=location&filter=Elvas"           
-            - get:
-                url: "/trysearch?query=Elvas&filterType=userid&filter=1"
-            - get:
-                url: "/trysearch?query=1&filterType=name&filter=Anibal"               
-          count: "{{numRentals}}"
+      - loop:
+          - get:
+              url: "/trysearch?query=Anibal&filterType=location&filter=Elvas"         
+          - get:
+              url: "/trysearch?query=Elvas&filterType=userId&filter=1" 
+          - get:
+              url: "/trysearch?query=Alguma coisa&filterType=name&filter=Anibal"               
+        count: "{{numActions}}"
 
   

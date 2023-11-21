@@ -1,0 +1,12 @@
+{
+  "scriptFile" : "../scc2223-lab5-1.0.jar",
+  "entryPoint" : "scc.serverless.BlobStoreFunction.setLastBlobInfo",
+  "bindings" : [ {
+    "type" : "blobTrigger",
+    "direction" : "in",
+    "name" : "imagereplication",
+    "path" : "images/{name}",
+    "dataType" : "binary",
+    "connection" : "BlobStoreConnection"
+  } ]
+}

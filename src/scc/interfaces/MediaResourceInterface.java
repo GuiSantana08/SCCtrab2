@@ -1,12 +1,14 @@
 package scc.interfaces;
 
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 public interface MediaResourceInterface {
 
@@ -17,10 +19,9 @@ public interface MediaResourceInterface {
      * @return the key used in Storage
      */
     @POST
-    @Path("/")
+    @Path("/upload")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-    @Produces(MediaType.APPLICATION_JSON)
-    public String upload(byte[] contents);
+    public Response upload(byte[] contents);
 
     /**
      * Return the contents of an image. Throw an appropriate error message if
@@ -30,7 +31,25 @@ public interface MediaResourceInterface {
      * @return the file in question
      */
     @GET
-    @Path("/{id}")
+    @Path("/download/{id}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public byte[] download(@PathParam("id") String id);
+    public Response download(@PathParam("id") String id);
+
+    /**
+     * 
+     * @param id
+     * @return
+     */
+    @DELETE
+    @Path("/delete/{id}")
+    public Response delete(@PathParam("id") String id);
+
+    /**
+     * 
+     * @return
+     */
+    @GET
+    @Path("/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listImages();
 }

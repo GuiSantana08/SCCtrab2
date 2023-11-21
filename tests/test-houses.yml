@@ -1,5 +1,5 @@
 config:
-  target: 'https://scc-backend-60353.azurewebsites.net/rest/house'
+  target: 'https://scc-backend-60353.azurewebsites.net/rest'
   http:
     timeout: 60
   plugins:
@@ -7,7 +7,7 @@ config:
     #metricsProcessEndpoint : "myProcessEndpoint"  # function used to aggregate endpoints for statistics
   processor: "./test-utils.js"
   variables:
-    numAuctions: 20
+    numActions: 20
   phases:
   - name: "Warm up"    # WARM UP PHASE: duration: 10s, starting with 1 new client/sec up to 5 new clients/sec
     duration: 1
@@ -15,13 +15,13 @@ config:
 
 
 scenarios:
+  - name: "House Testing"
+    weight: 1
+    flow:
   ################################### 1. Testing Houses without Cache and without Authentication
-  - name: "House Cycle 0-Cache 0-Auth"
-    weight: 0
-    flow:
       - loop:
         - post:
-            url: "/create"
+            url: "/house/create"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: false
@@ -36,7 +36,7 @@ scenarios:
               basePrice: 100
               availability: "october-november-december"
         - put: 
-            url: "/update"
+            url: "/house/update"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: false
@@ -51,26 +51,23 @@ scenarios:
               basePrice: 100
               availability: "october-november-december"
         - get:
-            url: "/get?id=6"
+            url: "/house/get?id=6"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: false
               isAuthActive: false
             afterResponse: "printStatus"
         - delete: 
-            url: "/delete?id=6"
+            url: "/house/delete?id=6"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: false
               isAuthActive: false
-        count: "{{ numAuctions }}"
+        count: "{{ numActions }}"
   ################################### 2. Testing User with Cache but without Authentication
-  - name: "House Cycle 1-Cache 0-Auth"
-    weight: 0
-    flow:
       - loop:
         - post:
-            url: "/create"
+            url: "/house/create"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
@@ -85,7 +82,7 @@ scenarios:
               basePrice: 100
               availability: "october-november-december"
         - put: 
-            url: "/update"
+            url: "/house/update"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
@@ -100,26 +97,27 @@ scenarios:
               basePrice: 100
               availability: "october-november-december"
         - get:
-            url: "/get?id=6"
+            url: "/house/get?id=6"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
               isAuthActive: false
-            afterResponse: "printStatus"
         - delete: 
-            url: "/delete?id=6"
+            url: "/house/delete?id=6"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
               isAuthActive: false
-        count: "{{ numAuctions }}"
-  ################################### 3. Testing User with Cache and Authentication
-  - name: "House Cycle 1-Cache 1-Auth"
-    weight: 0
-    flow:
+        count: "{{ numActions }}"
+  ################################### 3. Testing User with Cache and Authentication 
       - loop:
         - post:
-            url: "/create"
+            url: "/user/auth"
+            json: 
+              username: "1"
+              password: "password"
+        - post:
+            url: "/house/create"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
@@ -134,7 +132,7 @@ scenarios:
               basePrice: 100
               availability: "october-november-december"
         - put: 
-            url: "/update"
+            url: "/house/update"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
@@ -149,19 +147,19 @@ scenarios:
               basePrice: 100
               availability: "october-november-december"
         - get:
-            url: "/get?id=6"
+            url: "/house/get?id=6"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
               isAuthActive: true
             afterResponse: "printStatus"
         - delete: 
-            url: "/delete?id=6"
+            url: "/house/delete?id=6"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: true
               isAuthActive: true
-        count: "{{ numAuctions }}"
+        count: "{{ numActions }}"
       
 
        
