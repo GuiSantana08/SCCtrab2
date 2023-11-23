@@ -16,8 +16,8 @@ import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import scc.azure.cache.RedisCache;
-import scc.azure.db.HouseDBLayer;
-import scc.azure.db.RentalDBLayer;
+import scc.azure.db.HousesDBLayer;
+import scc.azure.db.RentalsDBLayer;
 import scc.data.HouseDAO;
 import scc.data.Rental;
 import scc.data.RentalDAO;
@@ -27,8 +27,8 @@ import scc.interfaces.RentalResourceInterface;
 public class RentalResource implements RentalResourceInterface {
 
     ObjectMapper mapper = new ObjectMapper();
-    RentalDBLayer rentalDB = RentalDBLayer.getInstance();
-    HouseDBLayer houseDB = HouseDBLayer.getInstance();
+    RentalsDBLayer rentalDB = RentalsDBLayer.getInstance();
+    HousesDBLayer houseDB = HousesDBLayer.getInstance();
 
     static RedisCache cache = RedisCache.getInstance();
 
@@ -148,17 +148,15 @@ public class RentalResource implements RentalResourceInterface {
     public Response listDiscountedRentals(String id) {
         List<RentalDAO> discountedRentals = new ArrayList<>();
         try {
-            CosmosPagedIterable<HouseDAO> houseCosmos = houseDB.getHouseById(id);
+            HouseDAO house = houseDB.getHouseById(id);
             int currentMonth = LocalDate.now().getMonth().getValue();
 
-            for (HouseDAO h : houseCosmos) {
-                CosmosPagedIterable<RentalDAO> rentals = rentalDB.getRentalsByHouseId(h.getId());
-                for (RentalDAO r : rentals) {
-                    for (String month : r.getRentalPeriod().split("-")) {
-                        if (r.getPrice() < h.getBasePrice()
-                                && Month.valueOf(month.toUpperCase()).getValue() > currentMonth)
-                            discountedRentals.add(r);
-                    }
+            List<RentalDAO> rentals = rentalDB.getRentalsByHouseId(house.getId());
+            for (RentalDAO r : rentals) {
+                for (String month : r.getRentalPeriod().split("-")) {
+                    if (r.getPrice() < house.getBasePrice()
+                            && Month.valueOf(month.toUpperCase()).getValue() > currentMonth)
+                        discountedRentals.add(r);
                 }
             }
 
@@ -185,12 +183,10 @@ public class RentalResource implements RentalResourceInterface {
             }
         }
 
-        CosmosPagedIterable<HouseDAO> houseIt = houseDB.getHouseById(rental.getHouseId());
+        HouseDAO house = houseDB.getHouseById(rental.getHouseId());
 
-        if (!houseIt.iterator().hasNext())
+        if (house == null)
             return false;
-
-        HouseDAO house = houseIt.iterator().next();
 
         if (rental.getPrice() > house.getBasePrice())
             return false;

@@ -14,7 +14,6 @@ import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import scc.azure.cache.RedisCache;
-import scc.azure.db.QuestionDBLayer;
 import scc.data.Question;
 import scc.data.QuestionDAO;
 import scc.interfaces.QuestionResourceInterface;

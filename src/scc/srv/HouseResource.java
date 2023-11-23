@@ -11,9 +11,9 @@ import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import scc.azure.cache.RedisCache;
-import scc.azure.db.HouseDBLayer;
-import scc.azure.db.RentalDBLayer;
-import scc.azure.db.UserDBLayer;
+import scc.azure.db.HousesDBLayer;
+import scc.azure.db.RentalsDBLayer;
+import scc.azure.db.UsersDBLayer;
 import scc.azure.search.CSLayer;
 import scc.data.House;
 import scc.data.HouseDAO;
@@ -30,9 +30,9 @@ public class HouseResource implements HouseResourceInterface {
 
     ObjectMapper mapper = new ObjectMapper();
 
-    HouseDBLayer houseDb = HouseDBLayer.getInstance();
-    RentalDBLayer rentDb = RentalDBLayer.getInstance();
-    UserDBLayer userDb = UserDBLayer.getInstance();
+    HousesDBLayer houseDb = HousesDBLayer.getInstance();
+    RentalsDBLayer rentDb = RentalsDBLayer.getInstance();
+    UsersDBLayer userDb = UsersDBLayer.getInstance();
 
     static RedisCache cache = RedisCache.getInstance();
 
@@ -44,13 +44,13 @@ public class HouseResource implements HouseResourceInterface {
             }
 
             HouseDAO hDAO = new HouseDAO(house);
-            CosmosItemResponse<HouseDAO> h = houseDb.putHouse(hDAO);
+            HouseDAO h = houseDb.putHouse(hDAO);
 
             if (isCacheActive) {
                 cache.setValue(hDAO.getId(), hDAO);
             }
 
-            return Response.ok(h.getItem().toString()).build();
+            return Response.ok(h).build();
         } catch (NotAuthorizedException c) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(c.getLocalizedMessage()).build();
         } catch (CosmosException c) {
@@ -64,9 +64,9 @@ public class HouseResource implements HouseResourceInterface {
     public Response deleteHouse(boolean isCacheActive, boolean isAuthActive, Cookie session, String id) {
         try {
             if (isAuthActive) {
-                var houseIt = houseDb.getHouseById(id).iterator();
-                if (houseIt.hasNext())
-                    UserResource.checkCookieUser(session, houseIt.next().getUserId());
+                var houseIt = houseDb.getHouseById(id);
+
+                UserResource.checkCookieUser(session, houseIt.getUserId());
             }
 
             houseDb.delHouseById(id);
@@ -97,10 +97,10 @@ public class HouseResource implements HouseResourceInterface {
                 var newH = houseDb.getHouseById(id);
 
                 if (isCacheActive) {
-                    cache.setValue(id, newH.iterator().next());
+                    cache.setValue(id, newH);
                 }
 
-                return Response.ok(newH.iterator().next()).build();
+                return Response.ok(newH).build();
             }
 
             return Response.ok(h).build();

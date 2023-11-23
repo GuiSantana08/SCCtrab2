@@ -17,8 +17,7 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import scc.azure.cache.RedisCache;
-import scc.azure.db.HouseDBLayer;
-import scc.azure.db.UserDBLayer;
+import scc.azure.db.UsersDBLayer;
 import scc.data.HouseDAO;
 import scc.data.User;
 import scc.data.UserDAO;
@@ -32,8 +31,7 @@ import scc.utils.Session;
 public class UserResource implements UserResourceInterface {
 
     ObjectMapper mapper = new ObjectMapper();
-    UserDBLayer userDb = UserDBLayer.getInstance();
-    HouseDBLayer houseDb = HouseDBLayer.getInstance();
+    UsersDBLayer userDb = UsersDBLayer.getInstance();
     static RedisCache cache = RedisCache.getInstance();
 
     @Override
@@ -45,13 +43,13 @@ public class UserResource implements UserResourceInterface {
 
             UserDAO userDAO = new UserDAO(user);
             userDAO.setPwd(Hash.of(user.getPwd()));
-            CosmosItemResponse<UserDAO> u = userDb.putUser(userDAO);
+            UserDAO u = userDb.putUser(userDAO);
 
             if (isCacheActive) {
                 cache.setValue(userDAO.getId(), userDAO);
             }
 
-            return Response.ok(u.getItem().toString()).build();
+            return Response.ok(u).build();
         } catch (
 
         NotAuthorizedException c) {
@@ -153,9 +151,9 @@ public class UserResource implements UserResourceInterface {
             pwdOk = false;
         }
 
-        var userIt = userDb.getUserById(id).iterator();
+        var userIt = userDb.getUserById(id);
 
-        if (!userIt.hasNext() || !Hash.of(password).equals(userIt.next().getPwd())) {
+        if (userIt == null) {
             pwdOk = false;
         }
 

@@ -21,6 +21,11 @@
 	</properties>
 	<dependencies>
 		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongodb-driver-sync</artifactId>
+			<version>4.4.0</version>
+		</dependency>
+		<dependency>
 			<groupId>com.azure</groupId>
 			<artifactId>azure-search-documents</artifactId>
 			<version>11.5.12</version>

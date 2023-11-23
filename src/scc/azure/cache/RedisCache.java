@@ -7,13 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import scc.utils.Constants;
 import scc.utils.Session;
 
 public class RedisCache {
-    private static final String RedisHostname = Constants.camposConst.getRedisHostname();
-    private static final String RedisKey = Constants.camposConst.getredisKey();
-
     private static final int TTL = 60 * 15;
 
     private static JedisPool instance;
@@ -22,6 +18,9 @@ public class RedisCache {
     public synchronized static JedisPool getCachePool() {
         if (instance != null)
             return instance;
+
+        String redisHost = System.getenv("REDIS");
+
         final JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMaxTotal(128);
         poolConfig.setMaxIdle(128);
@@ -31,7 +30,7 @@ public class RedisCache {
         poolConfig.setTestWhileIdle(true);
         poolConfig.setNumTestsPerEvictionRun(3);
         poolConfig.setBlockWhenExhausted(true);
-        instance = new JedisPool(poolConfig, RedisHostname, 6380, 1000, RedisKey, true);
+        instance = new JedisPool(poolConfig, redisHost, 6380, 1000);
         return instance;
     }
 
