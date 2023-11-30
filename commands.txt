@@ -1,3 +1,0 @@
-To compile + deploy:
-    - mvn clean compile package azure-webapp:deploy
-

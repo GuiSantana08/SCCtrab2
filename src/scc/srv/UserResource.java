@@ -1,13 +1,10 @@
 package scc.srv;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
 
 import com.azure.cosmos.CosmosException;
-import com.azure.cosmos.models.CosmosItemResponse;
-import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.NotAuthorizedException;
@@ -17,6 +14,7 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import scc.azure.cache.RedisCache;
+import scc.azure.db.HousesDBLayer;
 import scc.azure.db.UsersDBLayer;
 import scc.data.HouseDAO;
 import scc.data.User;
@@ -31,7 +29,10 @@ import scc.utils.Session;
 public class UserResource implements UserResourceInterface {
 
     ObjectMapper mapper = new ObjectMapper();
+
     UsersDBLayer userDb = UsersDBLayer.getInstance();
+    HousesDBLayer houseDb = HousesDBLayer.getInstance();
+
     static RedisCache cache = RedisCache.getInstance();
 
     @Override
@@ -68,12 +69,12 @@ public class UserResource implements UserResourceInterface {
                 checkCookieUser(session, userId);
             }
 
-            for (HouseDAO h : houseDb.getHouseByUserId(userId)) {
-                CosmosPagedIterable<HouseDAO> houseCosmos = houseDb.getHouseById(h.getId());
-                if (houseCosmos.iterator().hasNext()) {
-                    HouseDAO upHouse = houseCosmos.iterator().next();
+            for (HouseDAO h : houseDb.getHousesByUserId(userId)) {
+                HouseDAO houseCosmos = houseDb.getHouseById(h.getId());
+                if (houseCosmos != null) {
+                    HouseDAO upHouse = houseCosmos;
                     upHouse.setUserId(Constants.deletedUser.getDbName());
-                    houseDb.updateHouse(upHouse.getId(), upHouse);
+                    houseDb.updateHouse(upHouse);
 
                     if (isCacheActive) {
                         cache.setValue(upHouse.getId(), upHouse);
@@ -105,13 +106,13 @@ public class UserResource implements UserResourceInterface {
 
             UserDAO uDAO = new UserDAO(user);
             uDAO.setPwd(Hash.of(user.getPwd()));
-            CosmosItemResponse<UserDAO> u = userDb.updateUser(uDAO);
+            UserDAO u = userDb.updateUser(uDAO);
 
             if (isCacheActive) {
                 cache.setValue(user.getId(), user);
             }
 
-            return Response.ok(u.getItem().toString()).build();
+            return Response.ok(u).build();
         } catch (NotAuthorizedException c) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(c.getMessage()).build();
         } catch (CosmosException c) {
@@ -123,16 +124,10 @@ public class UserResource implements UserResourceInterface {
 
     @Override
     public Response listHouses(String id) {
-        List<HouseDAO> userHouses = new ArrayList<>();
-
         try {
-            CosmosPagedIterable<HouseDAO> houses = houseDb.getHouseByUserId(id);
+            List<HouseDAO> houses = houseDb.getHousesByUserId(id);
 
-            for (HouseDAO h : houses) {
-                userHouses.add(h);
-            }
-
-            return Response.ok(userHouses.toString()).build();
+            return Response.ok(houses.toString()).build();
         } catch (CosmosException c) {
             return Response.status(c.getStatusCode()).entity(c.getLocalizedMessage()).build();
         } catch (Exception e) {

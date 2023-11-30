@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.azure.cosmos.CosmosException;
-import com.azure.cosmos.models.CosmosItemResponse;
-import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.NotAuthorizedException;
@@ -70,13 +68,13 @@ public class RentalResource implements RentalResourceInterface {
             }
 
             RentalDAO rDAO = new RentalDAO(rental, id);
-            CosmosItemResponse<RentalDAO> r = rentalDB.updateRental(rDAO);
+            RentalDAO r = rentalDB.updateRental(rDAO);
 
             if (isCacheActive) {
                 cache.setValue(rental.getId(), rental);
             }
 
-            return Response.ok(r.getItem().toString()).build();
+            return Response.ok(r.toString()).build();
 
         } catch (NotAuthorizedException c) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(c.getLocalizedMessage()).build();
@@ -96,15 +94,15 @@ public class RentalResource implements RentalResourceInterface {
             }
 
             if (r == null) {
-                CosmosPagedIterable<RentalDAO> rental = rentalDB.getRentalById(id);
+                RentalDAO rental = rentalDB.getRentalById(id);
 
-                if (rental.iterator().hasNext()) {
+                if (rental != null) {
 
                     if (isCacheActive) {
-                        cache.setValue(id, rental.iterator().next());
+                        cache.setValue(id, rental);
                     }
 
-                    return Response.ok(rental.iterator().next()).build();
+                    return Response.ok(rental).build();
                 }
 
                 return Response.status(Status.NOT_FOUND).build();
@@ -123,9 +121,9 @@ public class RentalResource implements RentalResourceInterface {
     public Response deleteRental(boolean isCacheActive, boolean isAuthActive, Cookie session, String id) {
         try {
             if (isAuthActive) {
-                var rentalIt = rentalDB.getRentalById(id).iterator();
-                if (rentalIt.hasNext())
-                    UserResource.checkCookieUser(session, rentalIt.next().getUserId());
+                var rentalIt = rentalDB.getRentalById(id);
+                if (rentalIt != null)
+                    UserResource.checkCookieUser(session, rentalIt.getUserId());
             }
 
             rentalDB.delRentalById(id);
@@ -173,13 +171,11 @@ public class RentalResource implements RentalResourceInterface {
         String first = args[0];
         String last = args[args.length - 1];
 
-        CosmosPagedIterable<RentalDAO> rentalsIt = rentalDB.getRentalById(rental.getHouseId());
+        RentalDAO rentalsIt = rentalDB.getRentalById(rental.getHouseId());
 
-        for (RentalDAO r : rentalsIt) {
-            for (String month : rental.getRentalPeriod().split("-")) {
-                if (r.getRentalPeriod().contains(month)) {
-                    return false;
-                }
+        for (String month : rental.getRentalPeriod().split("-")) {
+            if (rentalsIt.getRentalPeriod().contains(month)) {
+                return false;
             }
         }
 

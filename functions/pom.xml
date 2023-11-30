@@ -30,11 +30,6 @@
 			<version>12.19.1</version>
 		</dependency>
 <dependency>
-	<groupId>com.azure</groupId>
-	<artifactId>azure-cosmos</artifactId>
-	<version>4.37.0</version>
-</dependency>
-<dependency>
 	<groupId>org.apache.commons</groupId>
 	<artifactId>commons-lang3</artifactId>
 	<version>3.12.0</version>
@@ -59,6 +54,11 @@
 	<artifactId>resteasy-jackson2-provider</artifactId>
 	<version>6.2.0.Final</version>
 </dependency>
+        <dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongodb-driver-sync</artifactId>
+			<version>4.4.0</version>
+		</dependency>
 		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>

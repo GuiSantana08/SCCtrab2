@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.azure.cosmos.CosmosException;
-import com.azure.cosmos.models.CosmosItemResponse;
-import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.NotAuthorizedException;
@@ -14,6 +12,7 @@ import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import scc.azure.cache.RedisCache;
+import scc.azure.db.QuestionsDBLayer;
 import scc.data.Question;
 import scc.data.QuestionDAO;
 import scc.interfaces.QuestionResourceInterface;
@@ -22,7 +21,7 @@ import scc.interfaces.QuestionResourceInterface;
 public class QuestionResource implements QuestionResourceInterface {
 
     ObjectMapper mapper = new ObjectMapper();
-    QuestionDBLayer questionDb = QuestionDBLayer.getInstance();
+    QuestionsDBLayer questionDb = QuestionsDBLayer.getInstance();
 
     static RedisCache cache = RedisCache.getInstance();
 
@@ -36,13 +35,13 @@ public class QuestionResource implements QuestionResourceInterface {
 
             QuestionDAO qDAo = new QuestionDAO(question);
             qDAo.setHouse(id);
-            CosmosItemResponse<QuestionDAO> q = questionDb.putQuestion(qDAo);
+            QuestionDAO q = questionDb.putQuestion(qDAo);
 
             if (isCacheActive) {
                 cache.setValue(question.getId(), question);
             }
 
-            return Response.ok(q.getItem().toString()).build();
+            return Response.ok(q).build();
         } catch (NotAuthorizedException c) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(c.getLocalizedMessage()).build();
         } catch (CosmosException c) {
@@ -56,9 +55,9 @@ public class QuestionResource implements QuestionResourceInterface {
     public Response deleteQuestion(boolean isCacheActive, boolean isAuthActive, Cookie session, String id) {
         try {
             if (isAuthActive) {
-                var questionIt = questionDb.getQuestionById(id).iterator();
-                if (questionIt.hasNext())
-                    UserResource.checkCookieUser(session, questionIt.next().getPostUserId());
+                QuestionDAO questionIt = questionDb.getQuestionById(id);
+                if (questionIt != null)
+                    UserResource.checkCookieUser(session, questionIt.getPostUserId());
             }
 
             questionDb.delQuestionById(id);
@@ -82,7 +81,7 @@ public class QuestionResource implements QuestionResourceInterface {
         List<QuestionDAO> questions = new ArrayList<>();
         try {
 
-            CosmosPagedIterable<QuestionDAO> u = questionDb.getQuestionsByHouseId(id);
+            List<QuestionDAO> u = questionDb.getQuestionsByHouseId(id);
 
             for (QuestionDAO question : u) {
                 questions.add(question);

@@ -59,7 +59,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
         - name: azure-vote-front
-          image: alsgoncalves/scc2122-app2:latest
+          image: gm.campos/scc2324-app:latest
           volumeMounts:
             - mountPath: "/mnt/vol"
               name: images

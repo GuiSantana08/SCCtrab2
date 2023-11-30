@@ -1,8 +1,6 @@
 package scc.srv;
 
 import com.azure.cosmos.CosmosException;
-import com.azure.cosmos.models.CosmosItemResponse;
-import com.azure.cosmos.util.CosmosPagedIterable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.NotAuthorizedException;
@@ -119,13 +117,13 @@ public class HouseResource implements HouseResourceInterface {
             }
 
             HouseDAO hDAO = new HouseDAO(house);
-            CosmosItemResponse<HouseDAO> h = houseDb.updateHouse(house.getId(), hDAO);
+            HouseDAO h = houseDb.updateHouse(hDAO);
 
             if (isCacheActive) {
                 cache.setValue(house.getId(), house);
             }
 
-            return Response.ok(h.getItem().toString()).build();
+            return Response.ok(h.toString()).build();
         } catch (NotAuthorizedException c) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(c.getLocalizedMessage()).build();
         } catch (CosmosException c) {
@@ -139,11 +137,11 @@ public class HouseResource implements HouseResourceInterface {
     public Response listAvailableHouses(String location) {
         List<HouseDAO> housesList = new ArrayList<>();
         try {
-            CosmosPagedIterable<HouseDAO> houseCosmos = houseDb.getHouseByLocation(location);
+            List<HouseDAO> houseCosmos = houseDb.getHousesByLocation(location);
             String currentMonth = LocalDate.now().getMonth().toString().toLowerCase();
 
             for (HouseDAO h : houseCosmos) {
-                CosmosPagedIterable<RentalDAO> rentals = rentDb.getRentalsByHouseId(h.getId());
+                List<RentalDAO> rentals = rentDb.getRentalsByHouseId(h.getId());
                 boolean isOn = true;
                 for (RentalDAO r : rentals) {
                     if (r.getRentalPeriod().contains(currentMonth))
@@ -165,11 +163,11 @@ public class HouseResource implements HouseResourceInterface {
     public Response searchAvailableHouses(String period, String location) {
         List<HouseDAO> availableHouses = new ArrayList<>();
         try {
-            CosmosPagedIterable<HouseDAO> houseCosmos = houseDb.getHouseByLocation(location);
+            List<HouseDAO> houseCosmos = houseDb.getHousesByLocation(location);
             String[] months = period.split("-");
 
             for (HouseDAO h : filterAvailableHouses(houseCosmos, months)) {
-                CosmosPagedIterable<RentalDAO> rentals = rentDb.getRentalsByHouseId(h.getId());
+                List<RentalDAO> rentals = rentDb.getRentalsByHouseId(h.getId());
                 boolean isOn = true;
                 for (RentalDAO r : rentals) {
                     for (String month : months) {
@@ -214,7 +212,7 @@ public class HouseResource implements HouseResourceInterface {
         return Response.ok(result).build();
     }
 
-    private List<HouseDAO> filterAvailableHouses(CosmosPagedIterable<HouseDAO> houseCosmos, String[] months) {
+    private List<HouseDAO> filterAvailableHouses(List<HouseDAO> houseCosmos, String[] months) {
         List<HouseDAO> availableHouses = new ArrayList<>();
 
         for (HouseDAO h : houseCosmos) {

@@ -1,12 +1,13 @@
 FROM node
 WORKDIR /ROOT
 COPY images /ROOT/images
-COPY test-users.js /ROOT
-COPY test-rentals.js /ROOT
-COPY test-questions.js /ROOT
-COPY test-listing.js /ROOT
-COPY test-houses.js /ROOT
-COPY load-data.js /ROOT
+COPY test-users.yml /ROOT
+COPY test-rentals.yml /ROOT
+COPY test-questions.yml /ROOT
+COPY test-listing.yml /ROOT
+COPY test-houses.yml /ROOT
+COPY load-data.yml /ROOT
+COPY test-utils.js /ROOT
 RUN npm install artillery
 RUN npm install node-fetch -save
 RUN npm install https://github.com/preguica/artillery-plugin-metrics-by-endpoint.git

@@ -1,4 +1,4 @@
-package scc.azure.db;
+package scc.serverless.azure.db;
 
 import static com.mongodb.MongoClientSettings.getDefaultCodecRegistry;
 import static com.mongodb.client.model.Filters.eq;
@@ -17,7 +17,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-import scc.data.RentalDAO;
+import scc.serverless.data.RentalDAO;
 
 public class RentalsDBLayer {
     private static RentalsDBLayer instance;
@@ -86,6 +86,13 @@ public class RentalsDBLayer {
     public void delRentalById(String id) {
         init(RentalDAO.class);
         currentCollection.deleteOne(eq("_id", id));
+    }
+
+    public List<RentalDAO> getRentals() {
+        init(RentalDAO.class);
+        List<RentalDAO> rentals = new ArrayList<>();
+        currentCollection.find().into(rentals);
+        return rentals;
     }
 
 }

@@ -1,44 +1,98 @@
 package scc.azure.db;
 
-import com.azure.cosmos.models.CosmosItemResponse;
-import com.azure.cosmos.util.CosmosPagedIterable;
+import static com.mongodb.MongoClientSettings.getDefaultCodecRegistry;
+import static com.mongodb.client.model.Filters.eq;
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+
+import java.util.List;
+import java.util.ArrayList;
+
+import org.bson.codecs.configuration.CodecProvider;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
+
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 import scc.data.HouseDAO;
 
 public class HousesDBLayer {
-    private MongoDBLayer mongo;
     private static HousesDBLayer instance;
-
-    public HousesDBLayer() {
-        mongo = MongoDBLayer.getInstance();
-    }
+    private MongoCollection<HouseDAO> currentCollection;
+    private CodecRegistry pojoCodecRegistry;
 
     public static synchronized HousesDBLayer getInstance() {
         if (instance != null)
             return instance;
-        instance = new HousesDBLayer();
+
+        CodecProvider pojoP = PojoCodecProvider.builder().automatic(true).build();
+        CodecRegistry pojoR = fromRegistries(getDefaultCodecRegistry(), fromProviders(pojoP));
+
+        instance = new HousesDBLayer(pojoR);
+
         return instance;
     }
 
-    public HouseDAO putHouse(HouseDAO hDAO) {
-        return mongo.putHouse(hDAO);
+    public HousesDBLayer(CodecRegistry pojoCodecRegistry) {
+        this.pojoCodecRegistry = pojoCodecRegistry;
     }
 
-    public HouseDAO getHouseById(String id) {
-        return mongo.getHouseById(id);
+    private synchronized <T> void init(Class<T> type) {
+        String host = System.getenv("MONGODB_SERVICE_SERVICE_HOST");
+        String port = System.getenv("MONGODB_SERVICE_SERVICE_PORT");
+        String mongoPassword = System.getenv("MONGO_INITDB_ROOT_PASSWORD");
+        String mongoUser = System.getenv("MONGO_INITDB_ROOT_USERNAME");
+        String uri = String.format("mongodb://%s:%s@%s:%s", mongoUser, mongoPassword, host, port);
+        MongoClient mongoClient = MongoClients.create(uri);
+        MongoDatabase database = mongoClient.getDatabase("data").withCodecRegistry(pojoCodecRegistry);
+
+        currentCollection = database.getCollection("Houses", HouseDAO.class);
+    }
+
+    public HouseDAO putHouse(HouseDAO a) {
+        init(HouseDAO.class);
+        HouseDAO house = (HouseDAO) currentCollection.find(eq("_id", a.getId())).first();
+        if (house != null) {
+            currentCollection.deleteOne(eq("_id", a.getId()));
+        }
+        currentCollection.insertOne(a);
+        return a;
     }
 
     public void delHouseById(String id) {
-        mongo.delHouseById(id);
+        init(HouseDAO.class);
+        currentCollection.deleteOne(eq("_id", id));
     }
 
-    public CosmosItemResponse<HouseDAO> updateHouse(String id, HouseDAO hDAO) {
-        // TODO
-        return null;
+    public HouseDAO getHouseById(String id) {
+        init(HouseDAO.class);
+        HouseDAO house = (HouseDAO) currentCollection.find(eq("_id", id)).first();
+        return house;
     }
 
-    public CosmosPagedIterable<HouseDAO> getHouseByLocation(String location) {
-        // TODO
-        return null;
+    public List<HouseDAO> getHousesByUserId(String id) {
+        init(HouseDAO.class);
+        List<HouseDAO> houses = new ArrayList<>();
+        currentCollection.find(eq("userId", id)).into(houses);
+        return houses;
+    }
+
+    public HouseDAO updateHouse(HouseDAO hDAO) {
+        init(HouseDAO.class);
+        HouseDAO user = (HouseDAO) currentCollection.find(eq("_id", hDAO.getId())).first();
+        if (user != null)
+            return null;
+        currentCollection.replaceOne(eq("_id", hDAO.getId()), hDAO);
+        return hDAO;
+    }
+
+    public List<HouseDAO> getHousesByLocation(String location) {
+        init(HouseDAO.class);
+        List<HouseDAO> houses = new ArrayList<>();
+        currentCollection.find(eq("location", location)).into(houses);
+        return houses;
     }
 }

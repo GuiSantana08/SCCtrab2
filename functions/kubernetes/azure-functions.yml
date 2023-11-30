@@ -15,6 +15,28 @@ spec:
       containers:
         - name: my-function
           image: my-function:1.0
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          ports:
+            - containerPort: 63355
+          env:
+            - name: REDIS
+              value: "azure-vote-back"
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongo-root-username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongo-root-password
 ---
 apiVersion: batch/v1beta1
 kind: CronJob
@@ -40,5 +62,5 @@ spec:
     app: my-function
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 8080
+      port: 63355
+      targetPort: 63355
