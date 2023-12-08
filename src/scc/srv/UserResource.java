@@ -50,6 +50,9 @@ public class UserResource implements UserResourceInterface {
                 cache.setValue(userDAO.getId(), userDAO);
             }
 
+            if(u == null)
+                return Response.status(Status.BAD_REQUEST).build();
+
             return Response.ok(u).build();
         } catch (
 
@@ -70,16 +73,13 @@ public class UserResource implements UserResourceInterface {
             }
 
             for (HouseDAO h : houseDb.getHousesByUserId(userId)) {
-                HouseDAO houseCosmos = houseDb.getHouseById(h.getId());
-                if (houseCosmos != null) {
-                    HouseDAO upHouse = houseCosmos;
-                    upHouse.setUserId(Constants.deletedUser.getDbName());
-                    houseDb.updateHouse(upHouse);
+                    h.setUserId(Constants.deletedUser.getDbName());
+                    houseDb.updateHouse(h);
 
                     if (isCacheActive) {
-                        cache.setValue(upHouse.getId(), upHouse);
+                        cache.setValue(h.getId(), h);
                     }
-                }
+                
             }
 
             if (isCacheActive) {
@@ -127,7 +127,7 @@ public class UserResource implements UserResourceInterface {
         try {
             List<HouseDAO> houses = houseDb.getHousesByUserId(id);
 
-            return Response.ok(houses.toString()).build();
+            return Response.ok(houses).build();
         } catch (CosmosException c) {
             return Response.status(c.getStatusCode()).entity(c.getLocalizedMessage()).build();
         } catch (Exception e) {

@@ -1,0 +1,1 @@
+mvn clean compile package & docker image rm guisantana08/scc2324-app & docker build -t guisantana08/scc2324-app "." & docker push guisantana08/scc2324-app & kubectl delete deployments,services,pods --all & kubectl apply -f ./kubernetes/azure-vote.yaml & kubectl get pods & kubectl get services

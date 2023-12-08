@@ -153,7 +153,7 @@ public class RentalResource implements RentalResourceInterface {
             for (RentalDAO r : rentals) {
                 for (String month : r.getRentalPeriod().split("-")) {
                     if (r.getPrice() < house.getBasePrice()
-                            && Month.valueOf(month.toUpperCase()).getValue() > currentMonth)
+                            && Month.valueOf(month.toUpperCase()).getValue() >= currentMonth)
                         discountedRentals.add(r);
                 }
             }
@@ -171,11 +171,13 @@ public class RentalResource implements RentalResourceInterface {
         String first = args[0];
         String last = args[args.length - 1];
 
-        RentalDAO rentalsIt = rentalDB.getRentalById(rental.getHouseId());
+        List<RentalDAO> rentalsIt = rentalDB.getRentalsByHouseId(rental.getHouseId());
 
-        for (String month : rental.getRentalPeriod().split("-")) {
-            if (rentalsIt.getRentalPeriod().contains(month)) {
-                return false;
+        for(RentalDAO rentalObj: rentalsIt) {
+            for (String month : rental.getRentalPeriod().split("-")) {
+                if (rentalObj.getRentalPeriod().contains(month)) {
+                    return false;
+                }
             }
         }
 

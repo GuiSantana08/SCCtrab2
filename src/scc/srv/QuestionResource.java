@@ -34,7 +34,7 @@ public class QuestionResource implements QuestionResourceInterface {
             }
 
             QuestionDAO qDAo = new QuestionDAO(question);
-            qDAo.setHouse(id);
+            qDAo.setHouseId(id);
             QuestionDAO q = questionDb.putQuestion(qDAo);
 
             if (isCacheActive) {

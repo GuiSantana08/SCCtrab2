@@ -17,17 +17,17 @@
     - az group create --name scc2324-cluster-60353 --location northeurope
 
 * start container:
-    - az container create --resource-group scc2324-cluster-60353 --name scc-app --image gmcampos/scc2324-app --ports 8080 --dns-name-label scc-reservation-60353
+    - az container create --resource-group scc2324-cluster-60182 --name scc-app --image guisantana08/scc2324-app --ports 8080 --dns-name-label scc-reservation-60182
 
 * delete container: 
-    - az container delete --resource-group scc2324-cluster-60353 --name scc-app
+    - az container delete --resource-group scc2324-cluster-60182 --name scc-app
 
 # Kubernetes
 * create a service:
     -  az ad sp create-for-rbac --name http://scc2324-kuber --role Contributor --scope /subscriptions/<ID_OF_YOUR_SUBSCRIPTION>
 
 * create a cluster:
-    - az aks create --resource-group scc2324-cluster-60353 --name scc2324-cluster-60353 --node-vm-size Standard_B2s --generate-ssh-keys
+    - az aks create --resource-group scc2324-cluster-60353 --name scc2324-cluster-60353 --node-vm-size Standard_B2s --generate-ssh-keys 
       --node-count 2 --service-principal <appId_REPLACE> --client-secret <password_REPLACE>
 
 * get credentials:

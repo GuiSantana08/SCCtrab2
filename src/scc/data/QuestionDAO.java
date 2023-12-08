@@ -16,9 +16,9 @@ public class QuestionDAO {
         this(q.getId(), "-1", q.getPostUserId(), q.getTextMessage());
     }
 
-    public QuestionDAO(String id, String house, String postUser, String textMessage) {
+    public QuestionDAO(String id, String houseId, String postUser, String textMessage) {
         this.id = id;
-        this.houseId = house;
+        this.houseId = houseId;
         this.postUserId = postUser;
         this.textMessage = textMessage;
     }
@@ -51,7 +51,7 @@ public class QuestionDAO {
         return this.houseId;
     }
 
-    public void setHouse(String house) {
+    public void setHouseId(String house) {
         this.houseId = house;
     }
 

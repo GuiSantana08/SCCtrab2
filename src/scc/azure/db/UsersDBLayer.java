@@ -72,7 +72,7 @@ public class UsersDBLayer {
     public UserDAO updateUser(UserDAO u) {
         init(UserDAO.class);
         UserDAO user = (UserDAO) currentCollection.find(eq("_id", u.getId())).first();
-        if (user != null)
+        if (user == null)
             return null;
         currentCollection.replaceOne(eq("_id", u.getId()), u);
         return u;

@@ -70,7 +70,7 @@ public class QuestionsDBLayer {
     public List<QuestionDAO> getQuestionsByHouseId(String id) {
         init(QuestionDAO.class);
         List<QuestionDAO> questions = new ArrayList<>();
-        currentCollection.find(eq("house_id", id)).into(questions);
+        currentCollection.find(eq("houseId", id)).into(questions);
         return questions;
     }
 

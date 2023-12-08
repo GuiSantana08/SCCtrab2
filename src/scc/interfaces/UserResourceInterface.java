@@ -12,6 +12,7 @@ public interface UserResourceInterface {
         @Path("/create")
         @POST
         @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
         public Response createUser(@HeaderParam("isCacheActive") boolean isCacheActive,
                         @HeaderParam("isAuthActive") boolean isAuthActive,
                         @CookieParam("scc:session") Cookie session, User user);
@@ -25,12 +26,14 @@ public interface UserResourceInterface {
         @Path("/update")
         @PUT
         @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
         public Response updateUser(@HeaderParam("isCacheActive") boolean isCacheActive,
                         @HeaderParam("isAuthActive") boolean isAuthActive, @CookieParam("scc:session") Cookie session,
                         User user);
 
         @Path("/listHouses")
         @GET
+        @Produces(MediaType.APPLICATION_JSON)
         public Response listHouses(@QueryParam("userId") String userId);
 
         @POST

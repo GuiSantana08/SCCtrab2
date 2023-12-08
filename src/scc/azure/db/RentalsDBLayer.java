@@ -64,14 +64,14 @@ public class RentalsDBLayer {
     public List<RentalDAO> getRentalsByHouseId(String id) {
         init(RentalDAO.class);
         List<RentalDAO> rental = new ArrayList<>();
-        currentCollection.find(eq("house_id", id)).into(rental);
+        currentCollection.find(eq("houseId", id)).into(rental);
         return rental;
     }
 
     public RentalDAO updateRental(RentalDAO rDAO) {
         init(RentalDAO.class);
         RentalDAO rental = (RentalDAO) currentCollection.find(eq("_id", rDAO.getId())).first();
-        if (rental != null)
+        if (rental == null)
             return null;
         currentCollection.replaceOne(eq("_id", rDAO.getId()), rDAO);
         return rDAO;
@@ -79,7 +79,7 @@ public class RentalsDBLayer {
 
     public RentalDAO getRentalById(String id) {
         init(RentalDAO.class);
-        RentalDAO rental = (RentalDAO) currentCollection.find(eq("id", id)).first();
+        RentalDAO rental = (RentalDAO) currentCollection.find(eq("_id", id)).first();
         return rental;
     }
 

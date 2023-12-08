@@ -28,7 +28,7 @@ spec:
               cpu: 250m
               memory: 256Mi
           ports:
-            - containerPort: 6379
+            - containerPort: 6380
               name: redis
 ---
 apiVersion: v1
@@ -37,7 +37,7 @@ metadata:
   name: azure-vote-back
 spec:
   ports:
-    - port: 6379
+    - port: 6380
   selector:
     app: azure-vote-back
 ---
@@ -59,7 +59,7 @@ spec:
         "beta.kubernetes.io/os": linux
       containers:
         - name: azure-vote-front
-          image: gm.campos/scc2324-app:latest
+          image: guisantana08/scc2324-app
           volumeMounts:
             - mountPath: "/mnt/vol"
               name: images
@@ -74,7 +74,7 @@ spec:
             - containerPort: 8080
           env:
             - name: REDIS
-              value: "azure-vote-back"
+              value: "azure-vote-baFck"
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:

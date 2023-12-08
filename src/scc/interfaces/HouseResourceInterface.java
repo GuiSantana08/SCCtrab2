@@ -10,6 +10,7 @@ public interface HouseResourceInterface {
         @Path("/create")
         @POST
         @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
         public Response createHouse(@HeaderParam("isCacheActive") boolean isCacheActive,
                         @HeaderParam("isAuthActive") boolean isAuthActive, @CookieParam("scc:session") Cookie session,
                         House house);
