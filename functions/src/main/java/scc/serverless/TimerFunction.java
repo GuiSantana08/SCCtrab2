@@ -3,7 +3,6 @@ package scc.serverless;
 import scc.serverless.azure.db.RentalsDBLayer;
 import scc.serverless.data.RentalDAO;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Month;
@@ -12,19 +11,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
 
-import com.microsoft.azure.functions.ExecutionContext;
-import com.microsoft.azure.functions.annotation.FunctionName;
-import com.microsoft.azure.functions.annotation.TimerTrigger;
-
 import redis.clients.jedis.Jedis;
 import scc.serverless.azure.cache.RedisCache;
 
 public class TimerFunction {
     private static final Logger logger = Logger.getLogger(TimerFunction.class.getName());
 
-    @FunctionName("deleteRentalsByTime")
-    public void cosmosFunction(@TimerTrigger(name = "periodicSetTime", schedule = "* */1 * * * *") String timerInfo,
-            ExecutionContext context) throws ParseException {
+    public static void main(String args[]) {
         logger.info("Java Timer trigger function executed at: " + new Date());
         RentalsDBLayer rentalDB = RentalsDBLayer.getInstance();
         try (Jedis jedis = RedisCache.getCachePool().getResource()) {

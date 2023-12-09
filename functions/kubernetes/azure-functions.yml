@@ -41,17 +41,18 @@ spec:
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: my-function-cron
+ name: my-function
 spec:
-  schedule: "* */1 * * *"
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-            - name: my-function
-              image: my-function:1.0
-          restartPolicy: OnFailure
+ schedule: "*/1 * * * *"
+ jobTemplate:
+   spec:
+     template:
+       spec:
+         containers:
+         - name: my-function
+           image: my-function:latest
+           imagePullPolicy: Always
+         restartPolicy: OnFailure
 ---
 apiVersion: v1
 kind: Service

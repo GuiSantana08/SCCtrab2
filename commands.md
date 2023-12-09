@@ -1,6 +1,6 @@
 # Maven
-* To compile + deploy:
-    - mvn clean compile package azure-webapp:deploy
+* To compile:
+    - mvn clean compile package
 
 # Docker
 * create image:

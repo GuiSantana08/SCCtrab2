@@ -1,6 +1,6 @@
 scc\serverless\utils\Session.class
 scc\serverless\utils\Hash.class
-scc\serverless\azure\db\RentalDBLayer.class
+scc\serverless\azure\db\RentalsDBLayer.class
 scc\serverless\TimerFunction.class
 scc\serverless\data\RentalDAO.class
 scc\serverless\data\Rental.class
