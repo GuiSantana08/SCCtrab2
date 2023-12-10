@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: my-function
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: my-function
+        spec:
+          containers:
+            - name: my-function
+              image: guisantana08/scc2324-functions
+              imagePullPolicy: Always
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+              ports:
+                - containerPort: 6382
+              env:
+                - name: REDIS
+                  value: "azure-vote-back"
+                - name: MONGO_INITDB_ROOT_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: mongodb-secret
+                      key: mongo-root-username
+                - name: MONGO_INITDB_ROOT_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: mongodb-secret
+                      key: mongo-root-password
+          restartPolicy: OnFailure  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-function-service
+spec:
+  selector:
+    app: my-function
+  ports:
+    - protocol: TCP
+      port: 6382
+      targetPort: 6382

@@ -28,7 +28,7 @@ spec:
               cpu: 250m
               memory: 256Mi
           ports:
-            - containerPort: 6380
+            - containerPort: 6379
               name: redis
 ---
 apiVersion: v1
@@ -37,7 +37,7 @@ metadata:
   name: azure-vote-back
 spec:
   ports:
-    - port: 6380
+    - port: 6379
   selector:
     app: azure-vote-back
 ---
@@ -74,7 +74,7 @@ spec:
             - containerPort: 8080
           env:
             - name: REDIS
-              value: "azure-vote-baFck"
+              value: "azure-vote-back"
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:

@@ -58,7 +58,7 @@ public class RentalsDBLayer {
         if (rental != null)
             return null;
         currentCollection.insertOne(r);
-        return rental;
+        return r;
     }
 
     public List<RentalDAO> getRentalsByHouseId(String id) {
