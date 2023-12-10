@@ -17,10 +17,13 @@
     - az group create --name scc2324-cluster-60182 --location northeurope
 
 * start container:
-    - az container create --resource-group scc2324-cluster-60182 --name scc2324-tests --image guisantana08/scc2324-tests --ports 8080 --dns-name-label scc-tests-60182
+    - az container create --resource-group scc2324-cluster-60182-westus --name scc2324-tests-westus --image guisantana08/scc2324-tests --ports 8080 --dns-name-label scc-tests-60182-westus
 
 * delete container: 
-    - az container delete --resource-group scc2324-cluster-60182 --name scc-app
+    - az container delete --resource-group scc2324-cluster-60182 --name scc2324-tests
+
+* logs:
+    - az container logs --resource-group scc2324-cluster-60182-westus --name scc2324-tests-westus
 
 # Kubernetes
 * create a service:

@@ -1,5 +1,5 @@
 config:
-  target: 'http://20.54.12.42:8080/scc2324-lab1-1.0/rest/media'
+  target: 'http://220.67.175.69:8080/scc2324-lab1-1.0/rest/media'
   plugins:
     metrics-by-endpoint:
       useOnlyRequestNames: true
