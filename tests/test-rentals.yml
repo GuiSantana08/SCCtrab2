@@ -50,6 +50,13 @@ scenarios:
               isCacheActive: false
               isAuthActive: false
             afterResponse: "printStatus" 
+        - get:
+            url: "/house/1/rental/listDiscontedRentals"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: false
+              isAuthActive: false
+            afterResponse: "printStatus"
         - delete:
             url: "/house/1/rental/delete?id=1"
             headers:

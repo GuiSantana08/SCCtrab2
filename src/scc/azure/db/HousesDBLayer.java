@@ -89,7 +89,7 @@ public class HousesDBLayer {
     public HouseDAO updateHouse(HouseDAO hDAO) {
         init(HouseDAO.class);
         HouseDAO user = (HouseDAO) currentCollection.find(eq("_id", hDAO.getId())).first();
-        if (user != null)
+        if (user == null)
             return null;
         currentCollection.replaceOne(eq("_id", hDAO.getId()), hDAO);
         return hDAO;

@@ -112,41 +112,5 @@ scenarios:
                 isCacheActive: false
                 isAuthActive: false
         count: "{{numActions}}"
-  ################################### 2. Testing Rental's listing functions
-      - loop:
-          - post:
-              url: "/2/rental/create"
-              headers:
-                Cookie: "scc:session={{sessionCookie}}"
-                isCacheActive: false
-                isAuthActive: false   
-              json: 
-                id: "1"
-                userId: "1" 
-                rentalPeriod: "november-december"
-                price: 1
-          - get:
-              url: "/2/rental/listDiscontedRentals"
-              headers:
-                Cookie: "scc:session={{sessionCookie}}"
-                isCacheActive: false
-                isAuthActive: false
-              afterResponse: "printStatus"
-          - delete:
-              url: "/2/rental/delete?id=1"
-              headers:
-                Cookie: "scc:session={{sessionCookie}}"
-                isCacheActive: false
-                isAuthActive: false 
-        count: "{{numActions}}"
-  ################################### 3. Testing Cognitive Search
-      - loop:
-          - get:
-              url: "/trysearch?query=Anibal&filterType=location&filter=Elvas"         
-          - get:
-              url: "/trysearch?query=Elvas&filterType=userId&filter=1" 
-          - get:
-              url: "/trysearch?query=Alguma coisa&filterType=name&filter=Anibal"               
-        count: "{{numActions}}"
 
   
