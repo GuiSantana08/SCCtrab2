@@ -1,10 +1,13 @@
 package scc.serverless.azure.cache;
 
+import java.util.concurrent.CancellationException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import scc.serverless.utils.Session;
 
 public class RedisCache {
     private static final int TTL = 60 * 15;
@@ -27,7 +30,7 @@ public class RedisCache {
         poolConfig.setTestWhileIdle(true);
         poolConfig.setNumTestsPerEvictionRun(3);
         poolConfig.setBlockWhenExhausted(true);
-        instance = new JedisPool(poolConfig, redisHost, 6380, 1000);
+        instance = new JedisPool(poolConfig, redisHost, 6379, 1000);
         return instance;
     }
 
@@ -65,6 +68,29 @@ public class RedisCache {
     public <T> void delete(String id) {
         try (Jedis jedis = RedisCache.getCachePool().getResource()) {
             jedis.del(id);
+        }
+    }
+
+    public void putSession(Session session) {
+        try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+            String cacheId = session.getUid();
+            jedis.set(cacheId, session.getUsername());
+            jedis.expire(cacheId, TTL);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public Session getSession(String uid) {
+        try (Jedis jedis = RedisCache.getCachePool().getResource()) {
+            String res = jedis.get(uid);
+
+            if (res == null)
+                throw new CancellationException();
+
+            return new Session(uid, res);
+        } catch (Exception e) {
+            throw new CancellationException();
         }
     }
 }

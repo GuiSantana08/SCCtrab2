@@ -1,0 +1,1 @@
+mvn clean compile package & docker image rm guisantana08/scc2324-functions & docker build -t guisantana08/scc2324-functions "." & docker push guisantana08/scc2324-functions & kubectl delete -f ./kubernetes/azure-functions.yaml & kubectl apply -f ./kubernetes/azure-functions.yaml & kubectl get pods & kubectl get services

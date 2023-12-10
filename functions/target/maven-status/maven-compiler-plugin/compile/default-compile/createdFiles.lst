@@ -1,9 +1,9 @@
 scc\serverless\utils\Session.class
 scc\serverless\utils\Hash.class
 scc\serverless\azure\db\RentalsDBLayer.class
-scc\serverless\TimerFunction.class
 scc\serverless\data\RentalDAO.class
 scc\serverless\data\Rental.class
+scc\serverless\KubernetesFunction.class
 scc\serverless\utils\Login.class
 scc\serverless\azure\cache\RedisCache.class
 scc\serverless\utils\Constants.class
