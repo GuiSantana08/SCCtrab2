@@ -14,10 +14,10 @@
 
 # Azure Docker
 * create cluster:
-    - az group create --name scc2324-cluster-60353 --location northeurope
+    - az group create --name scc2324-cluster-60182 --location northeurope
 
 * start container:
-    - az container create --resource-group scc2324-cluster-60182 --name scc-app --image guisantana08/scc2324-app --ports 8080 --dns-name-label scc-reservation-60182
+    - az container create --resource-group scc2324-cluster-60182 --name scc2324-tests --image guisantana08/scc2324-tests --ports 8080 --dns-name-label scc-tests-60182
 
 * delete container: 
     - az container delete --resource-group scc2324-cluster-60182 --name scc-app

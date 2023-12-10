@@ -1,5 +1,5 @@
 config:
-  target: 'https://scc-backend-60353.azurewebsites.net/rest'
+  target: 'http://20.54.12.42:8080/scc2324-lab1-1.0/rest'
   http:
     timeout: 60
   plugins:
@@ -21,6 +21,21 @@ scenarios:
     flow: 
   ################################### 1. Testing Rentals without Cache and without Authentication
       - loop:
+        - post:
+            url: "/house/create"
+            headers:
+              Cookie: "scc:session={{sessionCookie}}"
+              isCacheActive: false
+              isAuthActive: false
+            json:
+              id: "6"
+              name: "Anibal"
+              location: "Elvas"
+              description: " Alguma coisa"
+              photoId: "dsadsa"
+              userId: "1"
+              basePrice: 100
+              availability: "october-november-december"
         - post:
             url: "/house/1/rental/create"
             headers:
@@ -63,86 +78,11 @@ scenarios:
               Cookie: "scc:session={{sessionCookie}}"
               isCacheActive: false
               isAuthActive: false 
-        count: "{{ numActions }}"
-  ################################### 2. Testing Rentals with Cache but without Authentication
-      - loop:
-        - post:
-            url: "/house/1/rental/create"
+        - delete: 
+            url: "/house/delete?id=6"
             headers:
               Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
-              isAuthActive: false   
-            json: 
-              id: "1"
-              userId: "1" 
-              rentalPeriod: "october"
-              price: 100
-        - put:
-            url: "/house/1/rental/update"
-            headers:
-              Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
-              isAuthActive: false   
-            json: 
-              id: "1"
-              userId: "1" 
-              rentalPeriod: "october"
-              price: 100
-        - get:
-            url: "/house/1/rental/getInfo?id=1"
-            headers:
-              Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
+              isCacheActive: false
               isAuthActive: false
-            afterResponse: "printStatus" 
-        - delete:
-            url: "/house/1/rental/delete?id=1"
-            headers:
-              Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
-              isAuthActive: false 
-        count: "{{ numActions }}"
-  ################################### 3. Testing User with Cache and Authentication
-      - loop:
-        - post:
-            url: "/user/auth"
-            json: 
-              username: "1"
-              password: "password"
-        - post:
-            url: "/house/1/rental/create"
-            headers:
-              Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
-              isAuthActive: true   
-            json: 
-              id: "1"
-              userId: "1" 
-              rentalPeriod: "october"
-              price: 100
-        - put:
-            url: "/house/1/rental/update"
-            headers:
-              Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
-              isAuthActive: true   
-            json: 
-              id: "1"
-              userId: "1" 
-              rentalPeriod: "october"
-              price: 100
-        - get:
-            url: "/house/1/rental/getInfo?id=1"
-            headers:
-              Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
-              isAuthActive: true
-            afterResponse: "printStatus" 
-        - delete:
-            url: "/house/1/rental/delete?id=1"
-            headers:
-              Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
-              isAuthActive: true 
         count: "{{ numActions }}"
 

@@ -1,5 +1,5 @@
 config:
-  target: 'https://scc-backend-60353.azurewebsites.net/rest'
+  target: 'http://20.54.12.42:8080/scc2324-lab1-1.0/rest'
   http:
     timeout: 60
   plugins:
@@ -44,60 +44,3 @@ scenarios:
               isCacheActive: false
               isAuthActive: false 
         count: "{{ numActions }}" 
-  ################################### 2. Testing Questions with Cache but without Authentication
-      - loop:
-        - post:
-            url: "/house/1/question/create"
-            headers:
-              Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
-              isAuthActive: false
-            json:
-              id: "1"
-              postUserId: "1"
-              textMessage: "Isto é uma pergunta sobre uma casa, eu sou o user1"
-        - get:
-            url: "/house/1/question/list"
-            headers:
-              Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
-              isAuthActive: false
-            afterResponse: "printStatus" 
-        - delete:
-            url: "/house/1/question/delete?id=1"
-            headers:
-              Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
-              isAuthActive: false 
-        count: "{{ numActions }}"
-  ################################### 3. Testing Questions with Cache and Authentication
-      - loop:
-        - post:
-            url: "/user/auth"
-            json: 
-              username: "1"
-              password: "password"
-        - post:
-            url: "/house/1/question/create"
-            headers:
-              Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
-              isAuthActive: true
-            json:
-              id: "1"
-              postUserId: "1"
-              textMessage: "Isto é uma pergunta sobre uma casa, eu sou o user1"
-        - get:
-            url: "/house/1/question/list"
-            headers:
-              Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
-              isAuthActive: true
-            afterResponse: "printStatus" 
-        - delete:
-            url: "/house/1/question/delete?id=1"
-            headers:
-              Cookie: "scc:session={{sessionCookie}}"
-              isCacheActive: true
-              isAuthActive: true 
-        count: "{{ numActions }}"
