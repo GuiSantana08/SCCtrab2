@@ -164,7 +164,7 @@
                 <transformers>
                     <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                         <manifestEntries>
-                            <Main-Class>scc.serverless.TimerFunction</Main-Class>
+                            <Main-Class>scc.serverless.KubernetesFunction</Main-Class>
                         </manifestEntries>
                     </transformer>
                 </transformers>

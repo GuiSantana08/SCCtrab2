@@ -44,6 +44,10 @@ public class HouseResource implements HouseResourceInterface {
             HouseDAO hDAO = new HouseDAO(house);
             HouseDAO h = houseDb.putHouse(hDAO);
 
+            if (h == null) {
+                return Response.status(Status.CONFLICT).build();
+            }
+
             if (isCacheActive) {
                 cache.setValue(hDAO.getId(), hDAO);
             }
@@ -67,7 +71,11 @@ public class HouseResource implements HouseResourceInterface {
                 UserResource.checkCookieUser(session, houseIt.getUserId());
             }
 
-            houseDb.delHouseById(id);
+            String newId = houseDb.delHouseById(id);
+
+            if (newId == null) {
+                return Response.status(Status.CONFLICT).build();
+            }
 
             if (isCacheActive) {
                 cache.delete(id);
@@ -94,6 +102,10 @@ public class HouseResource implements HouseResourceInterface {
             if (h == null) {
                 var newH = houseDb.getHouseById(id);
 
+                if (newH == null) {
+                    return Response.status(Status.NOT_FOUND).build();
+                }
+
                 if (isCacheActive) {
                     cache.setValue(id, newH);
                 }
@@ -118,6 +130,10 @@ public class HouseResource implements HouseResourceInterface {
 
             HouseDAO hDAO = new HouseDAO(house);
             HouseDAO h = houseDb.updateHouse(hDAO);
+
+            if (h == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
 
             if (isCacheActive) {
                 cache.setValue(house.getId(), house);

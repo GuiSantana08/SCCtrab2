@@ -37,6 +37,10 @@ public class QuestionResource implements QuestionResourceInterface {
             qDAo.setHouseId(id);
             QuestionDAO q = questionDb.putQuestion(qDAo);
 
+            if (q == null) {
+                return Response.status(Status.CONFLICT).build();
+            }
+
             if (isCacheActive) {
                 cache.setValue(question.getId(), question);
             }
@@ -60,7 +64,11 @@ public class QuestionResource implements QuestionResourceInterface {
                     UserResource.checkCookieUser(session, questionIt.getPostUserId());
             }
 
-            questionDb.delQuestionById(id);
+            String newId = questionDb.delQuestionById(id);
+
+            if (newId == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
 
             if (isCacheActive) {
                 cache.delete(id);

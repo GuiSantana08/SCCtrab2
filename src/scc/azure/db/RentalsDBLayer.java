@@ -80,12 +80,17 @@ public class RentalsDBLayer {
     public RentalDAO getRentalById(String id) {
         init(RentalDAO.class);
         RentalDAO rental = (RentalDAO) currentCollection.find(eq("_id", id)).first();
+        if (rental == null)
+            return null;
         return rental;
     }
 
-    public void delRentalById(String id) {
-        init(RentalDAO.class);
+    public String delRentalById(String id) {
+        RentalDAO rental = (RentalDAO) currentCollection.find(eq("_id", id)).first();
+        if (rental == null)
+            return null;
         currentCollection.deleteOne(eq("_id", id));
+        return rental.getId();
     }
 
 }

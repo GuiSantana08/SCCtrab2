@@ -56,20 +56,26 @@ public class HousesDBLayer {
         init(HouseDAO.class);
         HouseDAO house = (HouseDAO) currentCollection.find(eq("_id", a.getId())).first();
         if (house != null) {
-            currentCollection.deleteOne(eq("_id", a.getId()));
+            return null;
         }
         currentCollection.insertOne(a);
         return a;
     }
 
-    public void delHouseById(String id) {
+    public String delHouseById(String id) {
         init(HouseDAO.class);
+        HouseDAO house = (HouseDAO) currentCollection.find(eq("_id", id)).first();
+        if (house == null)
+            return null;
         currentCollection.deleteOne(eq("_id", id));
+        return id;
     }
 
     public HouseDAO getHouseById(String id) {
         init(HouseDAO.class);
         HouseDAO house = (HouseDAO) currentCollection.find(eq("_id", id)).first();
+        if (house == null)
+            return null;
         return house;
     }
 

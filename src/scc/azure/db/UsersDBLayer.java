@@ -81,6 +81,8 @@ public class UsersDBLayer {
     public UserDAO getUserById(String id) {
         init(UserDAO.class);
         UserDAO user = (UserDAO) currentCollection.find(eq("_id", id)).first();
+        if (user == null)
+            return null;
         return user;
     }
 

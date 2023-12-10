@@ -43,7 +43,11 @@ public class RentalResource implements RentalResourceInterface {
             if (!isValidRental(rDAO))
                 return Response.status(Status.BAD_REQUEST).build();
 
-            rentalDB.putRental(rDAO);
+            RentalDAO rentalObj = rentalDB.putRental(rDAO);
+
+            if (rentalObj == null) {
+                return Response.status(Status.CONFLICT).build();
+            }
 
             if (isCacheActive) {
                 cache.setValue(rental.getId(), rental);
@@ -69,6 +73,10 @@ public class RentalResource implements RentalResourceInterface {
 
             RentalDAO rDAO = new RentalDAO(rental, id);
             RentalDAO r = rentalDB.updateRental(rDAO);
+
+            if (r == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
 
             if (isCacheActive) {
                 cache.setValue(rental.getId(), rental);
@@ -126,13 +134,17 @@ public class RentalResource implements RentalResourceInterface {
                     UserResource.checkCookieUser(session, rentalIt.getUserId());
             }
 
-            rentalDB.delRentalById(id);
+            String newId = rentalDB.delRentalById(id);
+
+            if (newId == null) {
+                return Response.status(Status.NOT_FOUND).build();
+            }
 
             if (isCacheActive) {
                 cache.delete(id);
             }
 
-            return Response.ok().build();
+            return Response.ok(id).build();
         } catch (NotAuthorizedException c) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(c.getLocalizedMessage()).build();
         } catch (CosmosException c) {
@@ -173,7 +185,7 @@ public class RentalResource implements RentalResourceInterface {
 
         List<RentalDAO> rentalsIt = rentalDB.getRentalsByHouseId(rental.getHouseId());
 
-        for(RentalDAO rentalObj: rentalsIt) {
+        for (RentalDAO rentalObj : rentalsIt) {
             for (String month : rental.getRentalPeriod().split("-")) {
                 if (rentalObj.getRentalPeriod().contains(month)) {
                     return false;

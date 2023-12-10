@@ -64,6 +64,8 @@ public class QuestionsDBLayer {
     public QuestionDAO getQuestionById(String id) {
         init(QuestionDAO.class);
         QuestionDAO question = (QuestionDAO) currentCollection.find(eq("_id", id)).first();
+        if (question == null)
+            return null;
         return question;
     }
 
@@ -74,8 +76,12 @@ public class QuestionsDBLayer {
         return questions;
     }
 
-    public void delQuestionById(String id) {
+    public String delQuestionById(String id) {
         init(QuestionDAO.class);
+        QuestionDAO rental = (QuestionDAO) currentCollection.find(eq("_id", id)).first();
+        if (rental == null)
+            return null;
         currentCollection.deleteOne(eq("_id", id));
+        return rental.getId();
     }
 }

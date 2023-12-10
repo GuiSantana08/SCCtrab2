@@ -50,7 +50,7 @@ public class UserResource implements UserResourceInterface {
                 cache.setValue(userDAO.getId(), userDAO);
             }
 
-            if(u == null)
+            if (u == null)
                 return Response.status(Status.BAD_REQUEST).build();
 
             return Response.ok(u).build();
@@ -73,20 +73,25 @@ public class UserResource implements UserResourceInterface {
             }
 
             for (HouseDAO h : houseDb.getHousesByUserId(userId)) {
-                    h.setUserId(Constants.deletedUser.getDbName());
-                    houseDb.updateHouse(h);
+                h.setUserId(Constants.deletedUser.getDbName());
+                houseDb.updateHouse(h);
 
-                    if (isCacheActive) {
-                        cache.setValue(h.getId(), h);
-                    }
-                
+                if (isCacheActive) {
+                    cache.setValue(h.getId(), h);
+                }
+
             }
 
             if (isCacheActive) {
                 cache.delete(userId);
             }
 
-            userDb.delUserById(userId);
+            String id = userDb.delUserById(userId);
+
+            if (id == null) {
+                Response.status(Status.NOT_FOUND).build();
+            }
+
             return Response.ok(userId).build();
         } catch (NotAuthorizedException c) {
             return Response.status(Status.NOT_ACCEPTABLE).entity(c.getLocalizedMessage()).build();
@@ -107,6 +112,10 @@ public class UserResource implements UserResourceInterface {
             UserDAO uDAO = new UserDAO(user);
             uDAO.setPwd(Hash.of(user.getPwd()));
             UserDAO u = userDb.updateUser(uDAO);
+
+            if (u == null) {
+                Response.status(Status.NOT_FOUND).build();
+            }
 
             if (isCacheActive) {
                 cache.setValue(user.getId(), user);
@@ -147,6 +156,10 @@ public class UserResource implements UserResourceInterface {
         }
 
         var userIt = userDb.getUserById(id);
+
+        if (userIt == null) {
+            Response.status(Status.NOT_FOUND).build();
+        }
 
         if (userIt == null) {
             pwdOk = false;
